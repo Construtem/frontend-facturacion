@@ -31,4 +31,7 @@ git commit -m "<descripcion pequeña del cambio>"
 git push origin feature/<nombre-funcionalidad> 
 ```
 
+iniciar con pdm install
+
+
 4. Crea un Pull Request (PR) a la rama ´develop´ desde GitHub para que sea revisado por otro desarrollador
