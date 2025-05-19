@@ -35,7 +35,7 @@ cd .\Desktop\
 </details>
 
 ```bash
-git clone 
+git clone https://github.com/Construtem/frontend-facturacion
 cd frontend-facturacion
 ```
 2. Construir imagen desde el directorio creado (ej "C:\Users\Admin\Desktop\frontend-facturacion"), debe ejecutar el siguiente comando:
