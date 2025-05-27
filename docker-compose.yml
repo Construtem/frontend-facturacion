@@ -14,7 +14,7 @@ services:
       - "3000:3000"
     
     # Asigna un nombre específico al contenedor para una fácil identificación.
-    container_name: front-facturacion
+    container_name: front-inventario
     
     # Política de reinicio: el contenedor se reiniciará automáticamente a menos que sea detenido explícitamente.
     # Útil para desarrollo si el contenedor falla, pero puedes ajustarlo según tu preferencia.

@@ -1,20 +1,20 @@
-# Frontend - Facturación
+# Frontend - Inventario
 
-Frontend para el módulo de **facturación** del sistema Construtem.
+Este repositorio contiene el frontend del módulo de **inventario y despacho** del sistema Construtem.
 
 ## 🛠️ Tecnologías
 - Next.js
-
+  
 ## 🚀 Funcionalidades
-- Visualización de facturas y boletas emitidas.
-- Generación de comprobantes desde ventas.
-- Consulta por cliente o número de documento.
+- Visualización del stock en bodegas y sucursales.
+- Registro y actualización de productos.
+- Gestión de despachos y movimientos de inventario.
 
 ## Requisitos
 
 - Docker Desktop instalado
-- Git instalado
-  
+- Git instalado  
+
 ## Instalación (entorno de desarrollo)
 
 1. Clonar el repositorio en el directorio deseado:
@@ -35,10 +35,10 @@ cd .\Desktop\
 </details>
 
 ```bash
-git clone https://github.com/Construtem/frontend-facturacion
-cd frontend-facturacion
+git clone https://github.com/Construtem/frontend-inventario
+cd frontend-inventario
 ```
-2. Correr aplicación desde directorio creado (ej "C:\Users\Admin\Desktop\frontend-facturacion"),
+2. Correr aplicación desde directorio creado (ej "C:\Users\Admin\Desktop\frontend-inventario"),
 ejecutando el siguiente comando:
 ```bash
 docker compose up
