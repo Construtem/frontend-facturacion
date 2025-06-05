@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-facturacion
+  labels:
+    app: frontend-facturacion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-facturacion
+  template:
+    metadata:
+      labels:
+        app: frontend-facturacion
+    spec:
+      containers:
+        - name: frontend-facturacion
+          image: gcr.io/construtem/frontend-facturacion:latest
+          ports:
+            - containerPort: 3000
