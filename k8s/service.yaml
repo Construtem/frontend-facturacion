@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-facturacion-service
+  name: front-facturacion-service
 spec:
+  type: ClusterIP
   selector:
-    app: frontend-facturacion
+    app: front-facturacion
   ports:
     - protocol: TCP
       port: 80
       targetPort: 3000
-  type: ClusterIP
