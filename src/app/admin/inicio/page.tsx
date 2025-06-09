@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from 'next/link'; // para navegacion por Next.js
-
+import {getinventario} from '../../lib/services/inventario';
 
 // Pantalla para realizar el pago
 export default function PagoPage() {
@@ -16,13 +16,13 @@ export default function PagoPage() {
 
 
 
-  
+
 //Dentro de él, se usa fetch() para hacer una petición HTTP al backend que tú hiciste en Go.
 //  La URL es: http://localhost:8080/api/cotizacion/1
 
   useEffect(() => {
     // Simulación de llamada a la API
-    fetch("http://localhost:8080/api/cotizacion/1")
+    fetch(getinventario(1)) // Cambia el ID según sea necesario
       .then((response) => response.json())
       .then((data) => setCotizacion(data))
       .catch((error) => console.error("Error al obtener la cotización:", error));
