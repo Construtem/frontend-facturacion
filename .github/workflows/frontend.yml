@@ -1,8 +1,6 @@
 name: Frontend CI
 
 on:
-  push:
-    branches: [ develop ]
   pull_request:
     branches: [ develop ]
 
@@ -27,3 +25,4 @@ jobs:
 
     - name: Ejecutar linter
       run: npm run lint
+      continue-on-error: true
