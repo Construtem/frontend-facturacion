@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: front-facturacion-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - facturacion.tssw.cl
+      secretName: front-facturacion-tls # cert-manager generará este secreto
+  rules:
+    - host: facturacion.tssw.cl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: front-facturacion-service
+                port:
+                  number: 80
