@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import rechazadoimg from "@/styles/images/rechazado.png";
 import aprobadoimg from "@/styles/images/aprobado.png";
@@ -8,13 +7,7 @@ import Header from "@/components/admin/header";
 import Link from "next/link";
 import { useParams, useSearchParams } from 'next/navigation';
 
-declare global {
-  interface Window {
-    MercadoPago: any;
-  }
-}
-
-const FormularioMP = () => {
+const ResultadoMP = () => {
     const params = useParams();
     const id = params.id;
     const searchParams = useSearchParams();
@@ -165,4 +158,4 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
 };
 
-export default FormularioMP;
+export default ResultadoMP;

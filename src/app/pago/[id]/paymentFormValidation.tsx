@@ -3,7 +3,7 @@ import { validators } from "./validators";
 
 type FieldValidity = { [key: string]: boolean | null };
 
-export function paymentFormValidation(fieldIds: string[]) {
+export function usePaymentFormValidation(fieldIds: string[]) {
     const initialValidity: FieldValidity = fieldIds.reduce((acc, id) => {
         acc[id] = null;
         return acc;

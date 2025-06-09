@@ -4,14 +4,26 @@ import { useState, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import mplogo from "@/styles/images/logo-mercado-pago.png";
 import Header from "@/components/admin/header";
-import { paymentFormValidation } from "./paymentFormValidation";
+import { usePaymentFormValidation } from "./paymentFormValidation";
 import Link from "next/link";
 import { useParams, useRouter } from 'next/navigation';
 import './styles.css'
 
 declare global {
   interface Window {
-    MercadoPago: any;
+    MercadoPago: new (
+      publicKey: string | undefined,
+      options: { locale: string }
+    ) => {
+      cardForm: (options: Record<string, unknown>) => {
+        getCardFormData: () => {
+          amount: number;
+          paymentMethodId: string;
+          token: string;
+          cardholderEmail: string;
+        };
+      };
+    };
   }
 }
 
@@ -20,7 +32,6 @@ const FormularioMP = () => {
   const router = useRouter();
   const id = params.id;
 
-  const [errorMsg, setErrorMsg] = useState('');
   const [showOverlay, setShowOverlay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +43,7 @@ const FormularioMP = () => {
     "form-checkout__cardholderEmail",
     "form-checkout__identificationNumber",
   ];
-  const { fieldValidity, isFormValid } = paymentFormValidation(fieldIds);
+  const { fieldValidity, isFormValid } = usePaymentFormValidation(fieldIds);
 
   function getInputStyle(fieldId: string) {
     return fieldValidity[fieldId] === false ? styles.inputError : styles.input;
@@ -47,7 +58,7 @@ const FormularioMP = () => {
     const script = document.createElement('script');
     script.src = 'https://sdk.mercadopago.com/js/v2';
     script.onload = () => {
-      const mp = new window.MercadoPago(process.env.TOKEN_MERCADOPAGO, {
+      const mp = new window.MercadoPago(process.env.NEXT_PUBLIC_TOKEN_MERCADOPAGO, {
         locale: 'es-CL',
       });
 
@@ -102,7 +113,7 @@ const FormularioMP = () => {
             e.preventDefault();
 
             const {
-              amount,
+              // amount,
               paymentMethodId,
               token,
               cardholderEmail,
@@ -116,7 +127,7 @@ const FormularioMP = () => {
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  transaction_amount: 100,
+                  transaction_amount: 100, // 100 placeholder
                   payment_method_id: paymentMethodId,
                   card_token: token,
                   email: cardholderEmail,
@@ -139,7 +150,7 @@ const FormularioMP = () => {
       });
     };
     document.body.appendChild(script);
-  }, []);
+  }, [id, router]);
 
   return (
     <div style={styles.pageBackground}>
@@ -261,7 +272,7 @@ const FormularioMP = () => {
                 />
                 {fieldValidity["form-checkout__identificationNumber"] === false && (
                   <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                    El número de documento sin puntos y con guión.
+                    El número de documento no puede ser vacío.
                   </p>
                 )}
               </label>
