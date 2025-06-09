@@ -1,37 +1,63 @@
+
 "use client";
 
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from 'next/link'; // para navegacion por Next.js
 
+// Esta es la página que muestra los detalles de la cotización y permite el pago
+// a través de Mercado Pago. Se espera que el ID de la cotización se pase como parámetro de búsqueda en la URL.
+//// Ejemplo de URL: /cotizacion?id=12345
+// Esta página se renderiza en el lado del cliente (client-side) para poder manejar la navegación y los efectos secundarios.
 
-// Pantalla para realizar el pago
-export default function PagoPage() {
-  const [cotizacion, setCotizacion] = useState<any>({
-    id: "N/A",
-    fecha_emision: "N/A",
-    subtotal: 0,
-    impuesto: 0,
-    total: 0,
-  });
+export default function CotizacionPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-
-
-  
-//Dentro de él, se usa fetch() para hacer una petición HTTP al backend que tú hiciste en Go.
-//  La URL es: http://localhost:8080/api/cotizacion/1
+  const id = searchParams.get("id");
+  const [cotizacion, setCotizacion] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulación de llamada a la API
-    fetch("http://localhost:8080/api/cotizacion/1")
-      .then((response) => response.json())
+    if (!id) return;
+
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cotizacion/${id}`;
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (response.ok) return response.json();
+        if (response.status === 400 || response.status === 404)
+          throw new Error("Cotización no encontrada o ID inválido");
+        throw new Error("Error inesperado al obtener la cotización");
+      })
       .then((data) => setCotizacion(data))
-      .catch((error) => console.error("Error al obtener la cotización:", error));
-  }, []);
+      .catch((error) => setError(error.message));
+  }, [id]);
+
+  if (error) {
+    return (
+      <div style={containerStyle}>
+        <div style={cardStyle}>
+          <h1 style={titleStyle}>Error</h1>
+          <p style={descriptionStyle}>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!cotizacion) {
+    return (
+      <div style={containerStyle}>
+        <div style={cardStyle}>
+          <h1 style={titleStyle}>Cargando cotización...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
-        <h1 style={titleStyle}>Detalles de pago</h1>
+        <h1 style={titleStyle}>Detalles de la cotización</h1>
         <p style={descriptionStyle}>
           A continuación, encontrarás los detalles de tu cotización. Por favor, verifica que toda la información sea correcta antes de proceder con el pago.
         </p>
@@ -51,22 +77,17 @@ export default function PagoPage() {
           <p style={detailTextStyle}>
             <strong>Total:</strong> <span style={placeholderStyle}>${cotizacion.total}</span>
           </p>
-          
         </div>
         <div style={buttonContainerStyle}>
-          <a href="https://www.wikipedia.org" style={buttonStyle} target="_blank" rel="no poner no referrer">
-            Atrás
-          </a>
-          
-          <Link href="/admin/inicio/test" style={buttonStyle}>
-            Pagar por mercado pago
-          </Link>
-          
-          
+          <button
+            style={buttonStyle}
+            onClick={() => {
+              router.push(`/mercadopago?total=${cotizacion.total}`);
+            }}
+          >
+            Pagar con Mercado Pago
+          </button>
         </div>
-      </div>
-      <div style={logoContainerStyle}>
-        <img src="/logo.png" alt="Logo de la empresa" style={logoStyle} />
       </div>
     </div>
   );
@@ -75,20 +96,19 @@ export default function PagoPage() {
 // --- CSS en JS ---
 const containerStyle: React.CSSProperties = {
   display: "flex",
-  marginLeft: "180px", // ancho del sidebar
-  marginTop: "70px",   // alto del header
-  padding: "2rem",
-  boxSizing: "border-box",
-  minHeight: "calc(100vh - 70px)",
-  backgroundColor: "#f9fafb", // Fondo más claro para mejor contraste
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100vh",
+  backgroundColor: "#f9fafb",
 };
 
 const cardStyle: React.CSSProperties = {
-  flex: 1,
   backgroundColor: "white",
   borderRadius: "12px",
   padding: "2rem",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.1)", // Sombra más pronunciada
+  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+  maxWidth: "600px",
+  width: "100%",
 };
 
 const titleStyle: React.CSSProperties = {
@@ -126,12 +146,9 @@ const placeholderStyle: React.CSSProperties = {
   color: "#2563eb",
 };
 
-
-
 const buttonContainerStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "center",
-  gap: "1rem",
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -141,36 +158,7 @@ const buttonStyle: React.CSSProperties = {
   backgroundColor: "#2563eb",
   color: "white",
   fontWeight: "bold",
-  textAlign: "center",
-  textDecoration: "none",
   cursor: "pointer",
   transition: "transform 0.2s, background-color 0.2s",
-  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", // Efecto 3D
-};
-
-const cashButtonStyle: React.CSSProperties = {
-  padding: "0.75rem 1.5rem",
-  border: "none",
-  borderRadius: "8px",
-  backgroundColor: "#10b981", // Color verde para diferenciar
-  color: "white",
-  fontWeight: "bold",
-  textAlign: "center",
-  textDecoration: "none",
-  cursor: "pointer",
-  transition: "transform 0.2s, background-color 0.2s",
-  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", // Efecto 3D
-};
-
-const logoContainerStyle: React.CSSProperties = {
-  marginLeft: "2rem",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const logoStyle: React.CSSProperties = {
-  width: "300px",
-  height: "auto",
-  marginTop: "2rem",
+  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
 };
