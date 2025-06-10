@@ -2,24 +2,35 @@
 
 import React from "react";
 import Image from "next/image";
-import logo from "@/styles/images/contrutem_png.png"; // Usa alias @ si está configurado en tsconfig.json
-import exit from "@/styles/images/exit.png";
+import logo from "@/styles/images/logo_barra_superior.png";
+import exit from "@/styles/images/cerrar-sesion.png";
+import { useRouter } from "next/navigation";
 
-import { useRouter } from "next/navigation"; // Cambia esto
+interface HeaderProps {
+  onToggleSidebar: () => void;
+}
 
-// Elimina esta línea:
-// const router = require("next/router").useRouter();
-
-const Header = () => {
-  const router = useRouter(); // Usa el hook dentro del componente
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
+  const router = useRouter();
 
   return (
     <header style={styles.header}>
       <div style={styles.left}>
+        {/* Botón hamburguesa */}
+        <button onClick={onToggleSidebar} style={styles.hamburgerButton}>
+          <svg viewBox="0 0 100 80" width="24" height="24" fill="white">
+            <rect width="100" height="10" />
+            <rect y="30" width="100" height="10" />
+            <rect y="60" width="100" height="10" />
+          </svg>
+        </button>
+
         <Image src={logo} alt="ConstrUTEM Logo" style={styles.logoImg as React.CSSProperties} />
       </div>
+
       <div style={styles.right}>
         <span style={styles.userInfo}>
+          <span style={styles.userRole}>Admin</span>
           <span style={styles.userIcon}>👤</span>
           <span style={styles.userText}>
             <span style={styles.userName}>Usuario</span>
@@ -40,13 +51,12 @@ const Header = () => {
     </header>
   );
 };
-// ...existing code...
 
 const styles: { [key: string]: React.CSSProperties } = {
   header: {
     width: '100%',
     height: '58px',
-    background: 'linear-gradient(90deg, #003366 0%, #00A859 60%, #00A859 100%)',
+    background: '#23395B',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
@@ -64,9 +74,33 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     height: '100%',
   },
+  hamburgerButton: {
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    marginRight: '1rem',
+    padding: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userRole: {
+    backgroundColor: '#ff8000',
+    borderRadius: '20px',
+    padding: '8px 15px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)',
+    color: '#222222',
+    fontWeight: 'medium',
+    fontFamily: 'Roboto, sans-serif',
+    fontSize: '0.9375rem',
+    whiteSpace: 'nowrap',
+  },
   logoImg: {
     height: 'auto',
-    maxHeight: '80px',
+    maxHeight: '58px',
     objectFit: 'contain',
     width: 'auto',
   },
