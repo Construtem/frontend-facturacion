@@ -28,7 +28,7 @@ const [cotizacion, setCotizacion] = useState({
     fetch('../../lib/services/inventario') // Cambia el ID según sea necesario
     // fetch llama la direchion de head inventario 
       .then((response) => response.json())
-      .then((data) => setCotizacion(data)) // a desarrollar !
+      .then((data) => getinventario(data)) // a desarrollar !
       .catch((error) => console.error("Error al obtener la cotización:", error));
   }, []);
 
