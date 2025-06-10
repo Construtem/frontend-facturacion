@@ -24,7 +24,7 @@ const [cotizacion, setCotizacion] = useState({
 
 
   useEffect(() => {
-    getinventario(99) // Cambia el ID según sea necesario
+    getinventario(98) // Cambia el ID según sea necesario
       .then((response) => {
         // Axios devuelve los datos en `response.data`
         setCotizacion(response.data);
@@ -62,7 +62,7 @@ const [cotizacion, setCotizacion] = useState({
             Atrás
           </a>
           
-          <Link href={'/pago/${id}'} style={buttonStyle}>
+          <Link href={`/pago/${cotizacion.id}`} style={buttonStyle}>
             Pagar por mercado pago
           </Link>
           
