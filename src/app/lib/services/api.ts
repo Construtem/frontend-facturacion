@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
 
-const baseURL = process.env.NEXT_API_URL;
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface RetryConfig extends AxiosRequestConfig {
     __isRetryRequest?: boolean;

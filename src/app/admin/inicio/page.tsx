@@ -24,11 +24,11 @@ const [cotizacion, setCotizacion] = useState({
 
 
   useEffect(() => {
-    // Simulación de llamada a la API
-    fetch('../../lib/services/inventario') // Cambia el ID según sea necesario
-    // fetch llama la direchion de head inventario 
-      .then((response) => response.json())
-      .then((data) => getinventario(data)) // a desarrollar !
+    getinventario(99) // Cambia el ID según sea necesario
+      .then((response) => {
+        // Axios devuelve los datos en `response.data`
+        setCotizacion(response.data);
+      })
       .catch((error) => console.error("Error al obtener la cotización:", error));
   }, []);
 

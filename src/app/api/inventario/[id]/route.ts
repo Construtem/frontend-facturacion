@@ -26,7 +26,7 @@ const GET = async (request: NextRequest, { params }: { params: Promise<{ id: num
     // Realizamos una solicitud GET al backend usando el cliente de API.
     // La URL incluye el ID dinámico para obtener datos específicos.
     // Nota: La URL debe ser actualizada para reflejar el endpoint real del backend.
-    const res = await api.get(`/api/cotizacion/${id}/`); // modificar esto al url real del diego
+    const res = await api.get(`http://localhost:3050/api/cotizacion/${id}`); // modificar esto al url real del diego
     // Si la solicitud al backend es exitosa, devolvemos una respuesta JSON
     // con los datos obtenidos y el estado HTTP correspondiente.
     return NextResponse.json(res.data, { status: res.status });
