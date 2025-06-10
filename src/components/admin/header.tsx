@@ -3,20 +3,22 @@
 import React from "react";
 import Image from "next/image";
 import logo from "@/styles/images/logo_barra_superior.png";
-import exit from "@/styles/images/cerrar-sesion.png";
+//import exit from "@/styles/images/cerrar-sesion.png";
 import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
 
   return (
     <header style={styles.header}>
       <div style={styles.left}>
-        {/* Botón hamburguesa */}
+        {/* Botón hamburguesa 
         <button onClick={onToggleSidebar} style={styles.hamburgerButton}>
           <svg viewBox="0 0 100 80" width="24" height="24" fill="white">
             <rect width="100" height="10" />
@@ -24,6 +26,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             <rect y="60" width="100" height="10" />
           </svg>
         </button>
+        */}
 
         <Image src={logo} alt="ConstrUTEM Logo" style={styles.logoImg as React.CSSProperties} />
       </div>
@@ -37,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             <span style={styles.userEmail}>correo@example.com</span>
           </span>
         </span>
-        <Image
+        {/*<Image
           src={exit}
           alt="Cerrar sesión"
           style={styles.logout as React.CSSProperties}
@@ -46,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           onClick={() => {
             router.push("/auth/login");
           }}
-        />
+        />*/}
       </div>
     </header>
   );

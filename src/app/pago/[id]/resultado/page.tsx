@@ -33,7 +33,7 @@ const ResultadoMP = () => {
                         <p style={styles.subtitle}>
                             Gracias por tu compra. El pago fue procesado correctamente.
                         </p>
-                        <Link
+                        {/*<Link
                             href={`/catalogo/${id}`}
                             type="button"
                             style={{
@@ -41,7 +41,7 @@ const ResultadoMP = () => {
                                 backgroundColor: "#ff8000",
                             }}
                             > Ver mi catálogo
-                        </Link>
+                        </Link>*/}
                         <div style={{ paddingBottom: '40px' }}></div>
                     </div>
                 }

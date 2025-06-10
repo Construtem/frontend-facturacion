@@ -5,8 +5,17 @@ import Link from 'next/link'; // para navegacion por Next.js
 import {getinventario} from '../../lib/services/inventario';
 import Image from 'next/image'; // para manejar imágenes en Next.js
 import log0 from '../../../../public/logo.png'; // Asegúrate de que la ruta sea correcta
+import Header from "@/components/admin/header"; //header oficial
+
+import { useParams } from 'next/navigation';
+
+
 
 export default function Inventario() {
+
+const params = useParams();
+const idParam = params.id;
+const id = Array.isArray(idParam) ? idParam[0] : idParam; // Asegura que sea string
 
 
 //Dentro de él, se usa fetch() para hacer una petición HTTP al backend que tú hiciste en Go.
@@ -24,16 +33,18 @@ const [cotizacion, setCotizacion] = useState({
 
 
   useEffect(() => {
-    getinventario(98) // Cambia el ID según sea necesario
+    getinventario(Number(id)) // Cambia el ID según sea necesario
       .then((response) => {
         // Axios devuelve los datos en `response.data`
         setCotizacion(response.data);
       })
       .catch((error) => console.error("Error al obtener la cotización:", error));
-  }, []);
+  }, [id]);
 
   return (
+    
     <div style={containerStyle}>
+       { <Header onToggleSidebar={() => {}} /> }
       <div style={cardStyle}>
         <h1 style={titleStyle}>Detalles de pago</h1>
         <p style={descriptionStyle}>
@@ -58,9 +69,11 @@ const [cotizacion, setCotizacion] = useState({
           
         </div>
         <div style={buttonContainerStyle}>
-          <a href="https://www.wikipedia.org" style={buttonStyle} target="_blank" rel="no poner no referrer">
+            {/* 
+            <a href="https://www.wikipedia.org" style={buttonStyle} target="_blank" rel="no poner no referrer">
             Atrás
-          </a>
+            </a>
+            */}
           
           <Link href={`/pago/${cotizacion.id}`} style={buttonStyle}>
             Pagar por mercado pago
@@ -70,7 +83,7 @@ const [cotizacion, setCotizacion] = useState({
         </div>
       </div>
       <div style={logoContainerStyle}>
-        <Image src={log0} alt="Logo de la empresa" style={logoStyle} />
+        <Image src={log0} alt="Logo de la empresa" style={logoStyle} priority/>
       </div>
     </div>
   );
