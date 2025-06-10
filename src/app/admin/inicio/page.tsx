@@ -3,28 +3,32 @@
 import { useEffect, useState } from "react";
 import Link from 'next/link'; // para navegacion por Next.js
 import {getinventario} from '../../lib/services/inventario';
+import Image from 'next/image'; // para manejar imágenes en Next.js
+import log0 from '../../../../public/logo.png'; // Asegúrate de que la ruta sea correcta
 
-// Pantalla para realizar el pago
-export default function PagoPage() {
-  const [cotizacion, setCotizacion] = useState<any>({
-    id: "N/A",
-    fecha_emision: "N/A",
-    subtotal: 0,
-    impuesto: 0,
-    total: 0,
-  });
-
-
+export default function Inventario() {
 
 
 //Dentro de él, se usa fetch() para hacer una petición HTTP al backend que tú hiciste en Go.
 //  La URL es: http://localhost:8080/api/cotizacion/1
+//const params = useParams(); // Obtiene los parámetros de la URL
+//const id = params?.id; // id viene desde la URL /pago/1, /pago/2, etc.
+
+const [cotizacion, setCotizacion] = useState({
+  id: "N/A",
+  fecha_emision: "N/A",
+  subtotal: 0,
+  impuesto: 0,
+  total: 0,
+});
+
 
   useEffect(() => {
     // Simulación de llamada a la API
-    fetch(getinventario(1)) // Cambia el ID según sea necesario
+    fetch('../../lib/services/inventario') // Cambia el ID según sea necesario
+    // fetch llama la direchion de head inventario 
       .then((response) => response.json())
-      .then((data) => setCotizacion(data))
+      .then((data) => setCotizacion(data)) // a desarrollar !
       .catch((error) => console.error("Error al obtener la cotización:", error));
   }, []);
 
@@ -58,7 +62,7 @@ export default function PagoPage() {
             Atrás
           </a>
           
-          <Link href="/admin/inicio/test" style={buttonStyle}>
+          <Link href={'/pago/${id}'} style={buttonStyle}>
             Pagar por mercado pago
           </Link>
           
@@ -66,7 +70,7 @@ export default function PagoPage() {
         </div>
       </div>
       <div style={logoContainerStyle}>
-        <img src="/logo.png" alt="Logo de la empresa" style={logoStyle} />
+        <Image src={log0} alt="Logo de la empresa" style={logoStyle} />
       </div>
     </div>
   );
@@ -148,19 +152,6 @@ const buttonStyle: React.CSSProperties = {
   boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", // Efecto 3D
 };
 
-const cashButtonStyle: React.CSSProperties = {
-  padding: "0.75rem 1.5rem",
-  border: "none",
-  borderRadius: "8px",
-  backgroundColor: "#10b981", // Color verde para diferenciar
-  color: "white",
-  fontWeight: "bold",
-  textAlign: "center",
-  textDecoration: "none",
-  cursor: "pointer",
-  transition: "transform 0.2s, background-color 0.2s",
-  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", // Efecto 3D
-};
 
 const logoContainerStyle: React.CSSProperties = {
   marginLeft: "2rem",

@@ -14,7 +14,7 @@ export default function CotizacionPage() {
   const router = useRouter();
 
   const id = searchParams.get("id");
-  const [cotizacion, setCotizacion] = useState<any>(null);
+  const [cotizacion, setCotizacion] = useState<unknown>(null); // eror al usar any ; no se el dato de setCotizacion 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

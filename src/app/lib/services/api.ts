@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { cookies } from 'next/headers';
+
 
 const baseURL = process.env.NEXT_API_URL;
 
