@@ -45,6 +45,7 @@ const [cotizacion, setCotizacion] = useState({
     
     <div style={containerStyle}>
        { <Header onToggleSidebar={() => {}} /> }
+      
       <div style={cardStyle}>
         <h1 style={titleStyle}>Detalles de pago</h1>
         <p style={descriptionStyle}>
