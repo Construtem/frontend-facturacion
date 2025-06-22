@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-facturacion
+  labels:
+    app: front-facturacion
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: front-facturacion
+  template:
+    metadata:
+      labels:
+        app: front-facturacion
+    spec:
+      containers:
+        - name: front-facturacion
+          # Pendiente: utilizar forma de no hardcodear la imagen y actualizar versiones
+          image: southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-facturacion:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          #Descomentar si se necesita configurar el backend URL para ser usado por el frontend como variable de entorno
+          #env:
+            #- name: BACKEND_URL
+              #value: "https://api-facturacion.tssw.cl"  # URL del backend de facturacion
