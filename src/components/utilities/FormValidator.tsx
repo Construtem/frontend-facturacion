@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 type FieldValidity = { [key: string]: boolean | null };
 type ValidatorsMap = { [key: string]: (value: string) => boolean };
 
-export function useFormValidator(fieldIds: string[], validators: ValidatorsMap) {
+export function useFormValidator(fieldIds: string[], validators: ValidatorsMap, formKey: number) {
     const initialValidity: FieldValidity = fieldIds.reduce((acc, id) => {
         acc[id] = null;
         return acc;
@@ -40,7 +40,7 @@ export function useFormValidator(fieldIds: string[], validators: ValidatorsMap) 
         element.addEventListener("blur", handleBlur);
         listeners.push({ element, handler: handleBlur });
         });
-    }, [fieldIds, validators]);
+    }, [fieldIds, validators, formKey]);
 
     useEffect(() => {
         setIsFormValid(Object.values(fieldValidity).every(Boolean));

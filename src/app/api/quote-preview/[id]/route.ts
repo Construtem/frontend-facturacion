@@ -6,7 +6,7 @@ export const GET = async (req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params;
     
-    const res = await api.get(`http://localhost:3050/api/cotizacion/${id}`);
+    const res = await api.get(`${process.env.DEV_BACKEND_URL}api/cotizacion/${id}`);
 
     return NextResponse.json(res.data, { status: res.status });
   } catch (err: unknown) {

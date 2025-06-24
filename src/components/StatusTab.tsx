@@ -10,6 +10,16 @@ export default function StatusTab({status, message, onUpdateStep}: {status: stri
 
     const [isApproved, setIsApproved] = useState<boolean>(false);
     
+    const translateError = (error: string | undefined): string => {
+        if (error === "cc_rejected_insufficient_amount") {
+            return "Su tajeta no tiene fondos suficientes para realizar el pago.";
+        }
+        else if (error === "a") {
+            return "a"; // otros errores
+        }
+        return "Ha ocurrido un error inesperado.";
+    };
+
     useEffect(() => {
         setIsApproved(status === 'approved');
     }, [status]);
@@ -60,7 +70,7 @@ export default function StatusTab({status, message, onUpdateStep}: {status: stri
                         ...styles.description,
                         textAlign: 'center',
                     }}>
-                        <strong>Motivo: </strong>{message || "Problemas del servidor."}
+                        <strong>Motivo: </strong>{translateError(message)}
                     </p>
                     <p style={{
                         ...styles.description,
@@ -77,7 +87,7 @@ export default function StatusTab({status, message, onUpdateStep}: {status: stri
                 { !isApproved ?
                 <button
                     type="button"
-                    onClick={() => onUpdateStep(2)}
+                    onClick={() => window.location.reload()}
                     style={{
                         ...styles.buttonStatus,
                         backgroundColor: "#5C5C5C",

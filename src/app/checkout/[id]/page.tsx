@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from "react";
+import { useParams } from "next/navigation";
 import Image from 'next/image';
 import logo from '@/assets/images/logo.png';
 import TabWizard from "@/components/utilities/tab-wizard/TabWizard";
@@ -13,17 +14,18 @@ interface Step {
 }
 
 export default function Checkout() {
+    const { id: quoteId } = useParams<{ id: string }>();
 
     // Pasos del proceso de checkout
     const steps: Step[] = [
         { id: 1, label: "Detalles de pago" },
         { id: 2, label: "Detalles de tarjeta" },
         { id: 3, label: "Estado de pago" },
-        { id: 4, label: "Resumen" },
+        { id: 4, label: "Resumen" }, 
     ];
 
     // Paso actual del checkout
-    const [currentStep, setCurrentStep] = useState<number>(1);
+    const [currentStep, setCurrentStep] = useState<number>(4);
 
     return (
         <div style={styles.containerWrapper}>
@@ -34,7 +36,7 @@ export default function Checkout() {
                 <TabWizard steps={steps} currentStep={currentStep} />
             </div>
             <div style={styles.tabContainer}>
-                <TabContainer currentStep={currentStep} onUpdateStep={setCurrentStep} />
+                <TabContainer quoteId={Number(quoteId)} currentStep={currentStep} onUpdateStep={setCurrentStep} />
             </div>
         </div>
     );

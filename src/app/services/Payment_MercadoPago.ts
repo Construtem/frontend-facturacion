@@ -5,6 +5,7 @@ interface paymentData {
     paymentMethodId: string,
     token: string,
     cardholderEmail: string,
+    cotizacionId: number,
 }
 
 export const postPayment_MercadoPago = async (data: paymentData) => {
@@ -13,6 +14,7 @@ export const postPayment_MercadoPago = async (data: paymentData) => {
         payment_method_id: data.paymentMethodId,
         card_token: data.token,
         email: data.cardholderEmail,
+        id: data.cotizacionId,
     });
     return response;
 };

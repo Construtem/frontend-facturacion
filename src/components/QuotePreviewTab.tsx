@@ -22,13 +22,20 @@ export interface QuotePreviewHandle {
 
 interface QuotePreviewTabProps extends React.HTMLProps<HTMLDivElement> {
   onUpdateStep: (step: number) => void;
+  quoteId: number;
 }
 
 export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
     function QuotePreviewTab(props, ref) {
-        const { onUpdateStep } = props;
+        const { onUpdateStep, quoteId } = props;
 
-        const id = 5; // numero de prueba debe mandarl el venta
+        const translateError = (error: string | number): string => {
+          if (Number(error) === 404) {
+            return "La cotización no existe o no ha sido encontrada.";
+          }
+          return "Ha ocurrido un error inesperado.";
+        };
+
         const [isLoading, setIsLoading] = useState<boolean>(true);
         const [responseError, setResponseError] = useState<string | null>(null);
 
@@ -40,7 +47,7 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
             total: 0,
         });
         useEffect(() => {
-            getQuotePreview(Number(id))
+            getQuotePreview(Number(quoteId))
             .then((response) => {
                 // Axios devuelve los datos en `response.data`
                 setCotizacion(response.data);
@@ -48,10 +55,10 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
             })
             .catch((error) => {
               console.error("Error al obtener la cotización:", error);
-              setResponseError(error.message);
+              setResponseError(translateError(error.response.status));
               setIsLoading(false);
             });
-        }, [id]);
+        }, [quoteId]);
 
         useImperativeHandle(ref, () => ({
             saveQuote: async () => {

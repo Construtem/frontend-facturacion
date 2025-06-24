@@ -16,6 +16,7 @@ export interface MercadoPagoHandle {
 interface MercadoPagoProps extends React.HTMLProps<HTMLDivElement> {
   onUpdateStep: (step: number) => void;
   transaction_amount: number | undefined;
+  cotizacion_id: number | string | undefined;
 }
 
 declare global {
@@ -38,7 +39,7 @@ declare global {
 
 export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
     function MercadoPagoTab(props, ref) {
-        const { onUpdateStep, transaction_amount } = props;
+        const { onUpdateStep, transaction_amount, cotizacion_id } = props;
         
         const [formKey, setFormKey] = useState<number>(0);
         const [status, setStatus] = useState<string>("");
@@ -64,7 +65,9 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
             "form-checkout__cardholderEmail",
             "form-checkout__identificationNumber",
         ];
-        const { fieldValidity, isFormValid } = useFormValidator(fieldIds, mpvalidators);
+        // Se le envia formKey para que se actualizen las referencias cada vez que
+        // se desmonta y monta el formulario.
+        const { fieldValidity, isFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
     
         function getInputStyle(fieldId: string) {
             return fieldValidity[fieldId] === false ? styles.inputError : styles.input;
@@ -155,6 +158,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 paymentMethodId: paymentMethodId,
                                 token: token,
                                 cardholderEmail: cardholderEmail,
+                                cotizacionId: Number(cotizacion_id),
                             }
 
                             showLoadingOverlay(true);
@@ -165,7 +169,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 onUpdateStep(3);
                                 showLoadingOverlay(false);
                                 if (response.data.status === "rejected") {
-                                    const error = response.data.status_detail;
+                                    const error = response.data.detalle_status;
                                     setStatusMessage(error);
                                     setFormKey(formkey => formkey + 1); // obliga al form a remontarse
                                 }
@@ -188,140 +192,144 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         return (
             <div style={styles.mpWrapper}>
                 <form id="form-checkout" style={styles.form} key={formKey}>
-                    <Image
-                        src={mplogo}
-                        alt="Mercado Pago logo"
-                        style={styles.logoImg as React.CSSProperties}
-                        draggable={false}
-                    />
                     <h2 style={styles.title}>Pago con tu tarjeta</h2>
                     <hr style={styles.line} />
                     <p style={styles.description}>
                         Ingresa los datos de tu tarjeta para
                         procesar tu compra de forma segura.
                     </p>
-                    <div style={styles.formInputs}>
-                        <h2
-                            style={{
+                    <div style={styles.doubleColumn}>
+                        <div style={styles.formInputs}>
+                            <h2
+                                style={{
+                                    ...styles.title,
+                                    fontSize: "24px",
+                                    marginBottom: "10px"
+                                }}
+                            > Datos de la tarjeta:
+                            </h2>
+                            <label style={styles.description}>
+                                Número de tarjeta
+                                <input
+                                id="form-checkout__cardNumber"
+                                style={getInputStyle("form-checkout__cardNumber")}
+                                />
+                                {fieldValidity["form-checkout__cardNumber"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    El número de tarjeta debe tener 16 dígitos separados por espacios.
+                                </p>
+                                )}
+                            </label>
+                            <label style={styles.description}>
+                                Fecha de vencimiento
+                                <input
+                                    id="form-checkout__expirationDate"
+                                    style={getInputStyle("form-checkout__expirationDate")}
+                                />
+                                {fieldValidity["form-checkout__expirationDate"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    La fecha debe estar en formato MM/AA y ser válida.
+                                </p>
+                                )}
+                            </label>
+                            <label style={styles.description}>
+                                Código de seguridad (CVV)
+                                <input
+                                    id="form-checkout__securityCode"
+                                    style={getInputStyle("form-checkout__securityCode")}
+                                />
+                                {fieldValidity["form-checkout__securityCode"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    El código de seguridad debe tener 3 ó 4 dígitos.
+                                </p>
+                                )}
+                            </label>
+                            <label style={styles.description}>
+                                Nombre del titular
+                                <input
+                                    id="form-checkout__cardholderName"
+                                    style={getInputStyle("form-checkout__cardholderName")}
+                                />
+                                {fieldValidity["form-checkout__cardholderName"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    El nombre del titular no puede estar vacío.
+                                </p>
+                                )}
+                            </label>
+                            <h2
+                                style={{
                                 ...styles.title,
                                 fontSize: "24px",
                                 marginBottom: "10px"
-                            }}
-                        > Datos de la tarjeta:
-                        </h2>
-                        <label style={styles.description}>
-                            Número de tarjeta
-                            <input
-                            id="form-checkout__cardNumber"
-                            style={getInputStyle("form-checkout__cardNumber")}
+                                }}
+                            > Datos del titular:
+                            </h2>
+                            <label style={styles.description}>
+                                Correo electrónico
+                                <input
+                                    id="form-checkout__cardholderEmail"
+                                    style={getInputStyle("form-checkout__cardholderEmail")}
+                                />
+                                {fieldValidity["form-checkout__cardholderEmail"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    El correo electrónico debe ser válido.
+                                </p>
+                                )}
+                            </label>
+                            <label style={{ ...styles.description}}>
+                                Tipo de documento
+                                <select
+                                    id="form-checkout__identificationType"
+                                    style={getInputStyle("form-checkout__identificationType")}
+                                ></select>
+                                {fieldValidity["form-checkout__identificationType"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    Seleccione un tipo de documento válido.
+                                </p>
+                                )}
+                            </label>
+                            <label style={styles.description}>
+                                Número de documento (RUT)
+                                <input
+                                    id="form-checkout__identificationNumber"
+                                    style={getInputStyle("form-checkout__identificationNumber")}
+                                />
+                                {fieldValidity["form-checkout__identificationNumber"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    El número de documento no puede ser vacío.
+                                </p>
+                                )}
+                            </label>
+                            <h2
+                                style={{
+                                ...styles.title,
+                                fontSize: "24px",
+                                marginBottom: "10px"
+                                }}
+                            > Datos bancarios:
+                            </h2>
+                            <label style={styles.description}>
+                                Banco emisor
+                                <select
+                                    id="form-checkout__issuer"
+                                    style={getInputStyle("form-checkout__issuer")}
+                                ></select>
+                                {fieldValidity["form-checkout__issuer"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    Seleccione un banco emisor válido.
+                                </p>
+                                )}
+                            </label>
+                            <select id="form-checkout__installments" style={{ display: 'none' }}></select>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                            <Image
+                                src={mplogo}
+                                alt="Mercado Pago logo"
+                                style={{ ...styles.logoImg, objectFit: 'contain' }}
+                                draggable={false}
                             />
-                            {fieldValidity["form-checkout__cardNumber"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                El número de tarjeta debe tener 16 dígitos separados por espacios.
-                            </p>
-                            )}
-                        </label>
-                        <label style={styles.description}>
-                            Fecha de vencimiento
-                            <input
-                                id="form-checkout__expirationDate"
-                                style={getInputStyle("form-checkout__expirationDate")}
-                            />
-                            {fieldValidity["form-checkout__expirationDate"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                La fecha debe estar en formato MM/AA y ser válida.
-                            </p>
-                            )}
-                        </label>
-                        <label style={styles.description}>
-                            Código de seguridad (CVV)
-                            <input
-                                id="form-checkout__securityCode"
-                                style={getInputStyle("form-checkout__securityCode")}
-                            />
-                            {fieldValidity["form-checkout__securityCode"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                El código de seguridad debe tener 3 ó 4 dígitos.
-                            </p>
-                            )}
-                        </label>
-                        <label style={styles.description}>
-                            Nombre del titular
-                            <input
-                                id="form-checkout__cardholderName"
-                                style={getInputStyle("form-checkout__cardholderName")}
-                            />
-                            {fieldValidity["form-checkout__cardholderName"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                El nombre del titular no puede estar vacío.
-                            </p>
-                            )}
-                        </label>
-                        <h2
-                            style={{
-                            ...styles.title,
-                            fontSize: "24px",
-                            marginBottom: "10px"
-                            }}
-                        > Datos del titular:
-                        </h2>
-                        <label style={styles.description}>
-                            Correo electrónico
-                            <input
-                                id="form-checkout__cardholderEmail"
-                                style={getInputStyle("form-checkout__cardholderEmail")}
-                            />
-                            {fieldValidity["form-checkout__cardholderEmail"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                El correo electrónico debe ser válido.
-                            </p>
-                            )}
-                        </label>
-                        <label style={{ ...styles.description}}>
-                            Tipo de documento
-                            <select
-                                id="form-checkout__identificationType"
-                                style={getInputStyle("form-checkout__identificationType")}
-                            ></select>
-                            {fieldValidity["form-checkout__identificationType"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                Seleccione un tipo de documento válido.
-                            </p>
-                            )}
-                        </label>
-                        <label style={styles.description}>
-                            Número de documento (RUT)
-                            <input
-                                id="form-checkout__identificationNumber"
-                                style={getInputStyle("form-checkout__identificationNumber")}
-                            />
-                            {fieldValidity["form-checkout__identificationNumber"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                El número de documento no puede ser vacío.
-                            </p>
-                            )}
-                        </label>
-                        <h2
-                            style={{
-                            ...styles.title,
-                            fontSize: "24px",
-                            marginBottom: "10px"
-                            }}
-                        > Datos bancarios:
-                        </h2>
-                        <label style={styles.description}>
-                            Banco emisor
-                            <select
-                                id="form-checkout__issuer"
-                                style={getInputStyle("form-checkout__issuer")}
-                            ></select>
-                            {fieldValidity["form-checkout__issuer"] === false && (
-                            <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                Seleccione un banco emisor válido.
-                            </p>
-                            )}
-                        </label>
-                        <select id="form-checkout__installments" style={{ display: 'none' }}></select>
+                        </div>
                     </div>
                     <div style={styles.buttonContainerMp}>
                         <button
@@ -385,7 +393,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     logoImg: {
         height: 'auto',
-        maxHeight: '58px',
+        maxHeight: '90px',
         objectFit: 'contain',
         width: 'auto',
     },
@@ -393,6 +401,11 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: 'flex',
         width: '100%',
         flexDirection: 'column',
+    },
+    doubleColumn: {
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '16px',
     },
     formInputs: {
         position: 'relative',
@@ -410,6 +423,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontSize: '16px',
         border: '1px solid #999',
         borderRadius: '5px',
+        minWidth: '50%',
         width: '100%',
         boxSizing: 'border-box',
     },

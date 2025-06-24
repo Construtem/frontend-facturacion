@@ -6,7 +6,7 @@ export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
 
-    const res = await api.post('http://localhost:3050/API/v1/payment', body);
+    const res = await api.post(`${process.env.DEV_BACKEND_URL}API/v1/payment`, body);
 
     return NextResponse.json(res.data, { status: res.status });
   } catch (err: unknown) {
