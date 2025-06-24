@@ -25,7 +25,7 @@ export default function Checkout() {
     ];
 
     // Paso actual del checkout
-    const [currentStep, setCurrentStep] = useState<number>(4);
+    const [currentStep, setCurrentStep] = useState<number>(1);
 
     return (
         <div style={styles.containerWrapper}>
