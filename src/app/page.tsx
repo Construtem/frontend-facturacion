@@ -2,6 +2,6 @@
 import { redirect } from 'next/navigation';
 
 export default function CheckoutRedirect() {
-  redirect(`/checkout`);
+  redirect(`/checkout/1`);
 }
 // Se redirige a checkout
