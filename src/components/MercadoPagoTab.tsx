@@ -8,6 +8,8 @@ import { mpvalidators } from "./utilities/Validators";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
 
+var rut_real = "";
+
 export interface MercadoPagoHandle {
   getStatus: () => string;
   getMessage: () => string;
@@ -128,7 +130,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                         },
                         identificationNumber: {
                             id: "form-checkout__identificationNumber",
-                            placeholder: "12.345.678-K",
+                            placeholder: "12345678K",
                         },
                         issuer: {
                             id: "form-checkout__issuer",
@@ -153,19 +155,14 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 cardholderEmail,
                             } = cardForm.getCardFormData();
 
-                            // Obtiene el valor limpio del RUT
-                            const rutInput = document.getElementById('form-checkout__identificationNumber') as HTMLInputElement;
-                            let identificationNumber = rutInput?.getAttribute('data-raw') || '';
-
+                            
+                            
                             const paymentData = {
                                 amount: Number(amount),
                                 paymentMethodId: paymentMethodId,
                                 token: token,
                                 cardholderEmail: cardholderEmail,
                                 cotizacionId: Number(cotizacion_id),
-                                // ojo con identificationNumber, que es el RUT sin puntos ni guion
-                                // Ejemplo: "20551884-3" se convierte en "205518843
-                                identificationNumber: identificationNumber,
                             }
 
                             showLoadingOverlay(true);
@@ -199,6 +196,8 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         // Estado para mostrar error si se ingresan letras en el número de tarjeta
         const [cardNumberError, setCardNumberError] = useState<string>("");
         const [cvvError, setCvvError] = useState<string>("");
+        // Estado para el tipo de documento, se usa para el RUT chileno
+        const [documentType, setDocumentType] = useState<string>("");
        
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
         function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -216,7 +215,9 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         // Formatea el RUT chileno visualmente y guarda el valor limpio en data-raw
         // Muestra error si se ingresan caracteres distintos de números o k/K
         function handleRutChange(e: React.ChangeEvent<HTMLInputElement>) {
-            
+            /*let value = e.target.value.replace(/[^0-9kK]/g, ''); // Solo números y k/K
+            value = value.slice(0, 9); // Máximo 9 caracteres
+            e.target.value = value;*/
             let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
             value = value.slice(0, 9); // Limita a 9 caracteres
             // Separa dígito verificador
@@ -226,9 +227,11 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
             body = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             // Une con guion si hay dígito verificador
             let visual = dv ? `${body}-${dv}` : body;
-            e.target.value = visual;
+            e.target.value = value; // antes era  = visual;
             // Guarda el valor limpio en data-raw
-            e.target.setAttribute('data-raw', value);
+            // e.target.setAttribute('data-raw', value);
+            rut_real = value; // Actualiza el valor real del RUT
+            console.log('RUT actualizado:', rut_real);
         }
         // Solo letras y espacios para nombre del titular
         function handleCardholderNameChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -350,6 +353,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 <select
                                     id="form-checkout__identificationType"
                                     style={getInputStyle("form-checkout__identificationType")}
+                                    onChange={e => setDocumentType(e.target.value)}
                                 ></select>
                                 {fieldValidity["form-checkout__identificationType"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
@@ -358,7 +362,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 )}
                             </label>
                             <label style={styles.description}>
-                                Número de documento (RUT)
+                                {documentType && documentType !== "RUT" ? "Número de documento" : "Número de documento (RUT SIN puntos NI guion)"}
                                 <input
                                     id="form-checkout__identificationNumber"
                                     style={getInputStyle("form-checkout__identificationNumber")}
