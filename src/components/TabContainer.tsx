@@ -5,8 +5,15 @@ import { useRef, useState, useEffect } from "react"
 import QuotePreviewTab, { QuotePreviewHandle } from './QuotePreviewTab'
 import MercadoPagoTab, { MercadoPagoHandle } from './MercadoPagoTab'
 import StatusTab from "./StatusTab"
-import ResumeTab from "./ResumeTab" // En construccion
+import SummaryTab from "./SummaryTab" // En construccion
 import '@/styles/globals.css' // Funciona para todos los hijos
+
+interface AmountDetails {
+  fecha_emision: string,
+  subtotal: number,
+  impuesto: number,
+  total: number,
+}
 
 export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quoteId: number, currentStep: number, onUpdateStep: (step: number) => void}) {
     const quoteRef = useRef<QuotePreviewHandle>(null)
@@ -14,11 +21,13 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
     const isVisible = (step: number) => ({ display: currentStep === step ? 'block' : 'none' })
 
     const [transactionAmount, setTransactionAmount] = useState<number | undefined>(undefined);
+    const [amountDetails, setAmountDetails] = useState<AmountDetails | undefined>(undefined);
     const [status, setStatus] = useState<string | undefined>(undefined);
     const [message, setMessage] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         setTransactionAmount(quoteRef.current?.getAmount());
+        setAmountDetails(quoteRef.current?.getAmountDetails());
         setStatus(pagoRef.current?.getStatus());
         setMessage(pagoRef.current?.getMessage());
     }, [currentStep]);
@@ -51,7 +60,10 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
             />
         </div>
         <div style={isVisible(4)}>
-            <ResumeTab />
+            <SummaryTab
+                quoteId={quoteId}
+                amountDetails={amountDetails}
+            />
         </div>
     </div>
     );

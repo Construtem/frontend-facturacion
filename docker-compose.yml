@@ -19,6 +19,9 @@ services:
     # Política de reinicio: el contenedor se reiniciará automáticamente a menos que sea detenido explícitamente.
     # Útil para desarrollo si el contenedor falla, pero puedes ajustarlo según tu preferencia.
     restart: unless-stopped
+
+    env_file:
+      - .env.local
     
     env_file:
       - .env.local
