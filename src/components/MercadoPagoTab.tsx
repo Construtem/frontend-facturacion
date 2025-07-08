@@ -8,6 +8,8 @@ import { mpvalidators } from "./utilities/Validators";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
 
+
+
 export interface MercadoPagoHandle {
   getStatus: () => string;
   getMessage: () => string;
@@ -104,7 +106,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                         id: "form-checkout",
                         cardNumber: {
                             id: "form-checkout__cardNumber",
-                            placeholder: "1234 5678 9100 1121",
+                            placeholder: "1234 5678 9012 3456",
                         },
                         expirationDate: {
                             id: "form-checkout__expirationDate",
@@ -112,11 +114,11 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                         },
                         securityCode: {
                             id: "form-checkout__securityCode",
-                            placeholder: "XYZ",
+                            placeholder: "123",
                         },
                         cardholderName: {
                             id: "form-checkout__cardholderName",
-                            placeholder: "Titular de la tarjeta",
+                            placeholder: "NOMBRE APELLIDO",
                         },
                         cardholderEmail: {
                             id: "form-checkout__cardholderEmail",
@@ -128,7 +130,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                         },
                         identificationNumber: {
                             id: "form-checkout__identificationNumber",
-                            placeholder: "XXXXXXXX-X",
+                            placeholder: "12345678K",
                         },
                         issuer: {
                             id: "form-checkout__issuer",
@@ -153,6 +155,8 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 cardholderEmail,
                             } = cardForm.getCardFormData();
 
+                            
+                            
                             const paymentData = {
                                 amount: Number(amount),
                                 paymentMethodId: paymentMethodId,
@@ -189,6 +193,63 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
             document.body.appendChild(script);
         }, [transaction_amount, formKey, onUpdateStep]);
 
+        // Estado para mostrar error si se ingresan letras en el número de tarjeta
+        const [cardNumberError, setCardNumberError] = useState<string>("");
+        const [cvvError, setCvvError] = useState<string>("");
+        // Estado para el tipo de documento, se usa para el RUT chileno
+        const [documentType, setDocumentType] = useState<string>("");
+       
+        // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
+        function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
+            if (/[^\d\s]/.test(e.target.value)) {
+                setCardNumberError("Solo se permiten números en este campo");
+            } else {
+                setCardNumberError("");
+            }
+            let value = e.target.value.replace(/\D/g, ""); // Solo dígitos
+            value = value.substring(0, 16); // Máximo 16 dígitos
+            value = value.replace(/(.{4})/g, "$1 ").trim(); // Espacio cada 4 dígitos
+            const input = document.getElementById("form-checkout__cardNumber") as HTMLInputElement;
+            if (input) input.value = value;
+        }
+        // Formatea el RUT chileno visualmente y guarda el valor limpio en data-raw
+        // Muestra error si se ingresan caracteres distintos de números o k/K
+        function handleRutChange(e: React.ChangeEvent<HTMLInputElement>) {
+            /*let value = e.target.value.replace(/[^0-9kK]/g, ''); // Solo números y k/K
+            value = value.slice(0, 9); // Máximo 9 caracteres
+            e.target.value = value;*/
+            let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
+            value = value.slice(0, 9); // Limita a 9 caracteres
+            // Separa dígito verificador
+            //let body = value.slice(0, -1);
+            //const dv = value.slice(-1);
+            // Formatea con puntos cada 3 dígitos desde la derecha
+            //body = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            // Une con guion si hay dígito verificador
+            //const visual = dv ? `${body}-${dv}` : body;
+            e.target.value = value; // antes era  = visual;
+            // Guarda el valor limpio en data-raw
+            // e.target.setAttribute('data-raw', value);
+            
+          
+        }
+        // Solo letras y espacios para nombre del titular
+        function handleCardholderNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+            const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, "");
+            e.target.value = value;
+        }
+        // Solo números y máximo 4 caracteres para el CVV
+        // Esta función se usa en el input del CVV para limitar la entrada y mostrar error si hay letras
+        function handleCvvChange(e: React.ChangeEvent<HTMLInputElement>) {
+            if (/[^\d]/.test(e.target.value)) {
+                setCvvError("Solo se permiten números en este campo");
+            } else {
+                setCvvError("");
+            }
+            let value = e.target.value.replace(/\D/g, ''); // Solo dígitos
+            value = value.slice(0, 4); // Máximo 4 caracteres
+            e.target.value = value;
+        }
         return (
             <div style={styles.mpWrapper}>
                 <form id="form-checkout" style={styles.form} key={formKey}>
@@ -213,7 +274,12 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 <input
                                 id="form-checkout__cardNumber"
                                 style={getInputStyle("form-checkout__cardNumber")}
+                                onChange={handleCardNumberChange}
+                                placeholder="1234 5678 9012 3456"
                                 />
+                                {cardNumberError && (
+                                    <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{cardNumberError}</p>
+                                )}
                                 {fieldValidity["form-checkout__cardNumber"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
                                     El número de tarjeta debe tener 16 dígitos separados por espacios.
@@ -237,7 +303,11 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 <input
                                     id="form-checkout__securityCode"
                                     style={getInputStyle("form-checkout__securityCode")}
+                                    onChange={handleCvvChange} // Limita a 4 dígitos numéricos y muestra error si hay letras
                                 />
+                                {cvvError && (
+                                    <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{cvvError}</p>
+                                )}
                                 {fieldValidity["form-checkout__securityCode"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
                                     El código de seguridad debe tener 3 ó 4 dígitos.
@@ -249,10 +319,12 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 <input
                                     id="form-checkout__cardholderName"
                                     style={getInputStyle("form-checkout__cardholderName")}
+                                    onChange={handleCardholderNameChange}
+                                    placeholder="NOMBRE APELLIDO"
                                 />
                                 {fieldValidity["form-checkout__cardholderName"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                    El nombre del titular no puede estar vacío.
+                                    El nombre del titular no puede estar vacío y solo debe contener letras.
                                 </p>
                                 )}
                             </label>
@@ -281,6 +353,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 <select
                                     id="form-checkout__identificationType"
                                     style={getInputStyle("form-checkout__identificationType")}
+                                    onChange={e => setDocumentType(e.target.value)}
                                 ></select>
                                 {fieldValidity["form-checkout__identificationType"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
@@ -289,14 +362,17 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 )}
                             </label>
                             <label style={styles.description}>
-                                Número de documento (RUT)
+                                {documentType && documentType !== "RUT" ? "Número de documento" : "Número de documento (RUT SIN puntos NI guion)"}
                                 <input
                                     id="form-checkout__identificationNumber"
                                     style={getInputStyle("form-checkout__identificationNumber")}
+                                    onChange={handleRutChange}
+                                    placeholder="12.345.678-K"
                                 />
+                                
                                 {fieldValidity["form-checkout__identificationNumber"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                    El número de documento no puede ser vacío.
+                                    El número de documento no puede ser vacío ni menor a 9 caracteres.
                                 </p>
                                 )}
                             </label>

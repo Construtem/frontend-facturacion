@@ -23,8 +23,5 @@ services:
     env_file:
       - .env.local
     
-    # Opcional: Define variables de entorno específicas para el contenedor en desarrollo.
-    # Por ejemplo, para configurar el entorno de Node.js.
-    # environment:
-    #   - NODE_ENV=development
-    #   - API_URL=http://backend-service:8080 # Si tuvieras un servicio de backend en docker-compose
+    env_file:
+      - .env.local
