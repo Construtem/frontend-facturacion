@@ -3,11 +3,10 @@
 
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { getQuotePreview } from '../app/services/QuotePreviewService';
-import parseLargeDate from "./utilities/ParseDate";
+import { parseLargeDate } from "./utilities/ParseDate";
 import formatNumberWithSpaces from "./utilities/FormatNumberWithDots";
 
-interface QuoteData {
-  id: number | string,
+interface AmountDetails {
   fecha_emision: string,
   subtotal: number,
   impuesto: number,
@@ -16,7 +15,7 @@ interface QuoteData {
 
 export interface QuotePreviewHandle {
   saveQuote: () => void;
-  getQuote: () => QuoteData;
+  getAmountDetails: () => AmountDetails;
   getAmount: () => number;
 }
 
@@ -65,8 +64,14 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
                 // const result = await QuotePreviewService.create({ /*…*/ });
                 // otras cosas utiles en caso de ser necesario
             },
-            getQuote: () => {
-              return cotizacion;
+            getAmountDetails: () => {
+              const amountDetails = {
+                fecha_emision: cotizacion.fecha_emision,
+                subtotal: cotizacion.subtotal,
+                impuesto: cotizacion.impuesto,
+                total: cotizacion.total
+              };
+              return amountDetails;
             },
             getAmount: () => {
               return cotizacion.total;
