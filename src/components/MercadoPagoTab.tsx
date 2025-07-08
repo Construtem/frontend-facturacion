@@ -8,7 +8,7 @@ import { mpvalidators } from "./utilities/Validators";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
 
-var rut_real = "";
+
 
 export interface MercadoPagoHandle {
   getStatus: () => string;
@@ -221,21 +221,21 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
             let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
             value = value.slice(0, 9); // Limita a 9 caracteres
             // Separa dígito verificador
-            let body = value.slice(0, -1);
-            let dv = value.slice(-1);
+            //let body = value.slice(0, -1);
+            //const dv = value.slice(-1);
             // Formatea con puntos cada 3 dígitos desde la derecha
-            body = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            //body = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             // Une con guion si hay dígito verificador
-            let visual = dv ? `${body}-${dv}` : body;
+            //const visual = dv ? `${body}-${dv}` : body;
             e.target.value = value; // antes era  = visual;
             // Guarda el valor limpio en data-raw
             // e.target.setAttribute('data-raw', value);
-            rut_real = value; // Actualiza el valor real del RUT
-            console.log('RUT actualizado:', rut_real);
+            
+          
         }
         // Solo letras y espacios para nombre del titular
         function handleCardholderNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-            let value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, "");
+            const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, "");
             e.target.value = value;
         }
         // Solo números y máximo 4 caracteres para el CVV
