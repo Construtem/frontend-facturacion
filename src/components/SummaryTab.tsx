@@ -14,36 +14,28 @@ interface AmountDetails {
 
 export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | undefined, amountDetails: AmountDetails | undefined}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [facturaPdf, setFacturaPdf] = useState<string | null>("/pdfprueba.pdf");
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
-    if (isModalOpen && quoteId != undefined) {
+    if (isModalOpen && quoteId !== undefined && pdfUrl == null) {
       getFacturaPdf(Number(quoteId))
-      .then((response) => {
-          // Axios devuelve los datos en `response.data`
-          setFacturaPdf(response.data);
-      })
-      .catch((error) => {
-        console.error("Error al obtener la factura:", error);
-      });
-    }
-  }, [isModalOpen]);
+        .then((response) => {
+          const pdfBytes = new Uint8Array(response.data);
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          setPdfUrl(url);
 
-  useEffect(() => {
-    if (facturaPdf) {
-      // Convierte el buffer a un Blob y luego a un Object URL
-      const blob = new Blob([facturaPdf], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      setPdfUrl(url);
-
-      // Limpia el Object URL cuando el componente se desmonta o cambia el PDF
-      return () => URL.revokeObjectURL(url);
+          // Limpieza
+          return () => URL.revokeObjectURL(url);
+        })
+        .catch((error) => {
+          console.error("Error al obtener la factura:", error);
+        });
     }
-  }, [facturaPdf]);
+    }, [isModalOpen, pdfUrl]);
 
   return (
     <div style={styles.container}>
@@ -52,8 +44,8 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
       <div style={styles.orangeBox}>
         <div style={styles.orangeBoxItem}>N° Factura: 2899</div>
         <div style={styles.orangeBoxItem}>Fecha de Emision: { amountDetails != undefined ? parseShortDate(amountDetails.fecha_emision) : "Error al cargar"}</div>
-        <div style={styles.orangeBoxItem}>Cliente: Camila Verde</div>
-        <div style={styles.orangeBoxItem}>Rut cliente: 28.199.293-9</div>
+        <div style={styles.orangeBoxItem}>Cliente: Cliente Ejemplo</div>
+        <div style={styles.orangeBoxItem}>Rut cliente: 12.345.678-9</div>
       </div>
 
       <div style={styles.details}>
@@ -71,7 +63,7 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
       <div style={styles.thanks}>Gracias por su compra</div>
 
       <div style={styles.footerBox}>
-        <div style={styles.footerItem}>Ferreteria Construtem: correo@decontacto.com</div>
+        <div style={styles.footerItem}>S.I.I. - Santiago</div>
         <div style={styles.footerItem}>2899</div>
       </div>
 
@@ -89,19 +81,26 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
                 ×
               </button>
             </div>
-            <embed
-              src={pdfUrl || ""}
-              type="application/pdf"
-              style={styles.iframe}
-            />
+            { pdfUrl != null &&
+              <embed
+                src={pdfUrl || ""}
+                type="application/pdf"
+                style={styles.iframe}
+              />
+            }
             <div style={styles.modalFooter}>
               <div style={styles.buttonContainer}>
                 <a
                   href={pdfUrl || ""}
                   download="Factura.pdf"
-                  style={styles.button}
+                  style={{
+                    ...styles.button,
+                    backgroundColor: pdfUrl != null ? "#FF7300" : "#999",
+                    cursor: pdfUrl != null ? "pointer" : "no-cursor",
+                  }}
+                  aria-disabled={pdfUrl == null}
                 >
-                  Descargar PDF
+                  { pdfUrl != null ? "Descargar PDF" : "Cargando PDF..." }
                 </a>
               </div>
               <div style={styles.buttonContainer}>
