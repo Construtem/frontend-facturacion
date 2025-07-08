@@ -8,10 +8,14 @@ export const mpvalidators: Record<string, (value: string) => boolean> = {
     // XYZ / WXYZ
     "form-checkout__securityCode": (v) => /^[0-9]{3,4}$/.test(v),
     // No vacio
-    "form-checkout__cardholderName": (v) => /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(v),
+    "form-checkout__cardholderName": (v) =>/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/.test(v.trim()),
     // Formato correo@example.com
     "form-checkout__cardholderEmail": (v) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/.test(v),
     // No vacio
-    "form-checkout__identificationNumber": (v) => /^\d{7,8}-[\dkK]$/.test(v) ||
-        v.trim().length === 9,
+    "form-checkout__identificationNumber": (v) => {
+        const clean = v.replace(/\./g, "").replace(/-/g, "");
+        
+        //console.log('Validando identificationNumber:', v, 'Clean:', clean);
+        return /^\d{7,8}-[\dkK]$/.test(clean) || clean.trim().length === 9;
+    },
 };
