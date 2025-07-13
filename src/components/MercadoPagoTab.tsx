@@ -214,13 +214,21 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
         function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
             if (/[^\d\s]/.test(e.target.value)) {
-                setCardNumberError("Solo se permiten números en este campo");
+            setCardNumberError("Solo se permiten números en este campo");
             } else {
-                setCardNumberError("");
+            setCardNumberError("");
             }
             let value = e.target.value.replace(/\D/g, ""); // Solo dígitos
             value = value.substring(0, 16); // Máximo 16 dígitos
-            value = value.replace(/(.{4})/g, "$1 ").trim(); // Espacio cada 4 dígitos
+
+            if (value.length === 15) {
+            // Espacio cada 2 dígitos para tarjetas de 15 dígitos (ej. American Express)
+            value = value.replace(/^(\d{4})(\d{6})(\d{5})$/, "$1 $2 $3");
+            } else {
+            // Espacio cada 4 dígitos para tarjetas de 16 dígitos
+            value = value.replace(/(.{4})/g, "$1 ").trim();
+            }
+
             const input = document.getElementById("form-checkout__cardNumber") as HTMLInputElement;
             if (input) input.value = value;
         }
