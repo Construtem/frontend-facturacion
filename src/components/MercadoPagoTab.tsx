@@ -4,7 +4,7 @@
 import { useEffect, useState, forwardRef, useImperativeHandle, FormEvent  } from "react";
 import { postPayment_MercadoPago } from "@/app/services/Payment_MercadoPago";
 import { useFormValidator } from "./utilities/FormValidator";
-import { mpvalidators } from "./utilities/Validators";
+import { mpvalidators, validateRutChileno } from "./utilities/Validators";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
 
@@ -69,7 +69,17 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         ];
         // Se le envia formKey para que se actualizen las referencias cada vez que
         // se desmonta y monta el formulario.
-        const { fieldValidity, isFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
+        const { fieldValidity: validatorFieldValidity, isFormValid: validatorIsFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
+    
+        // Estado para la validez de los campos, para poder actualizar manualmente el RUT
+        const [fieldValidity, setFieldValidity] = useState<{ [key: string]: boolean | null }>({});
+        const [isFormValid, setIsFormValid] = useState(false);
+        // Hook de validación, sincroniza con el estado local
+        const validatorResult = useFormValidator(fieldIds, mpvalidators, formKey);
+        useEffect(() => {
+            setFieldValidity(validatorResult.fieldValidity);
+            setIsFormValid(validatorResult.isFormValid);
+        }, [validatorResult.fieldValidity, validatorResult.isFormValid]);
     
         function getInputStyle(fieldId: string) {
             return fieldValidity[fieldId] === false ? styles.inputError : styles.input;
@@ -197,7 +207,9 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         const [cardNumberError, setCardNumberError] = useState<string>("");
         const [cvvError, setCvvError] = useState<string>("");
         // Estado para el tipo de documento, se usa para el RUT chileno
-        const [documentType, setDocumentType] = useState<string>("");
+        const [documentType, setDocumentType] = useState<string>("RUT");
+        // Estado para el mensaje de validación del RUT
+        const [rutValidationMsg, setRutValidationMsg] = useState<string>("");
        
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
         function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -215,23 +227,31 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         // Formatea el RUT chileno visualmente y guarda el valor limpio en data-raw
         // Muestra error si se ingresan caracteres distintos de números o k/K
         function handleRutChange(e: React.ChangeEvent<HTMLInputElement>) {
-            /*let value = e.target.value.replace(/[^0-9kK]/g, ''); // Solo números y k/K
-            value = value.slice(0, 9); // Máximo 9 caracteres
-            e.target.value = value;*/
             let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
             value = value.slice(0, 9); // Limita a 9 caracteres
-            // Separa dígito verificador
-            //let body = value.slice(0, -1);
-            //const dv = value.slice(-1);
-            // Formatea con puntos cada 3 dígitos desde la derecha
-            //body = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            // Une con guion si hay dígito verificador
-            //const visual = dv ? `${body}-${dv}` : body;
-            e.target.value = value; // antes era  = visual;
-            // Guarda el valor limpio en data-raw
-            // e.target.setAttribute('data-raw', value);
-            
-          
+            e.target.value = value;
+            // Valida el RUT visualmente si el tipo de documento es RUT
+            if (documentType === "RUT" && value.length >= 8) {
+                if (validateRutChileno(value)) {
+                    setRutValidationMsg("RUT válido");
+                    setFieldValidity(prev => ({
+                        ...prev,
+                        ["form-checkout__identificationNumber"]: true
+                    }));
+                } else {
+                    setRutValidationMsg("RUT inválido, verifique el digito verificador");
+                    setFieldValidity(prev => ({
+                        ...prev,
+                        ["form-checkout__identificationNumber"]: false
+                    }));
+                }
+            } else {
+                setRutValidationMsg("");
+                setFieldValidity(prev => ({
+                    ...prev,
+                    ["form-checkout__identificationNumber"]: null
+                }));
+            }
         }
         // Solo letras y espacios para nombre del titular
         function handleCardholderNameChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -369,8 +389,17 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                     onChange={handleRutChange}
                                     placeholder="12.345.678-K"
                                 />
-                                
-                                {fieldValidity["form-checkout__identificationNumber"] === false && (
+                                {documentType === "RUT" && rutValidationMsg && (
+                                    <p style={{ color: rutValidationMsg === "RUT válido" ? "green" : "red", fontSize: "12px", marginTop: "4px" }}>
+                                        {rutValidationMsg}
+                                    </p>
+                                )}
+                                {fieldValidity["form-checkout__identificationNumber"] === false && documentType === "RUT" && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    El RUT ingresado no es válido. Verifique el dígito verificador.
+                                </p>
+                                )}
+                                {fieldValidity["form-checkout__identificationNumber"] === false && documentType !== "RUT" && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
                                     El número de documento no puede ser vacío ni menor a 9 caracteres.
                                 </p>

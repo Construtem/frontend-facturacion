@@ -1,3 +1,28 @@
+
+
+export function validateRutChileno(rut: string): boolean {
+  const cleanRut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+  if (!/^\d{7,8}[0-9K]$/.test(cleanRut)) return false;
+  const body = cleanRut.slice(0, -1);
+  const dv = cleanRut.slice(-1);
+
+  let sum = 0, multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i], 10) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  const expectedDv = 11 - (sum % 11);
+  const dvCalc = expectedDv === 11 ? '0' : expectedDv === 10 ? 'K' : expectedDv.toString();
+
+ 
+
+
+  return dvCalc === dv;
+}
+
+
+
+
 export const mpvalidators: Record<string, (value: string) => boolean> = {
     // Visa/Mastercard: 4 bloques de 4 dígitos, Amex: 4-6-5 dígitos
     "form-checkout__cardNumber": (v) =>
@@ -14,8 +39,26 @@ export const mpvalidators: Record<string, (value: string) => boolean> = {
     // No vacio
     "form-checkout__identificationNumber": (v) => {
         const clean = v.replace(/\./g, "").replace(/-/g, "");
+
+        const upper = v.toUpperCase();
+        if (upper.slice(0, -1).includes('K')) {
+            return false;
+        }
+
         
         //console.log('Validando identificationNumber:', v, 'Clean:', clean);
         return /^\d{7,8}-[\dkK]$/.test(clean) || clean.trim().length === 9;
     },
+    "form-checkout__Rut": (v) => {
+        const clean = v.replace(/\./g, "").replace(/-/g, "");
+        const upper = v.toUpperCase();
+        console.log(true);
+        if (upper.slice(0, -1).includes('K')) {
+            return false;
+        }    
+        return validateRutChileno(v);
+
+        
+        return /^\d{7,8}-[\dkK]$/.test(clean) || clean.trim().length === 9;
+    }
 };
