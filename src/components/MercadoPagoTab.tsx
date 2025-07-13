@@ -225,7 +225,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 });
             };
             document.body.appendChild(script);
-        }, [transaction_amount, formKey, onUpdateStep]);
+        }, [transaction_amount, formKey, onUpdateStep, cotizacion_id]);
 
         // Estado para mostrar error si se ingresan letras en el número de tarjeta
         const [cardNumberError, setCardNumberError] = useState<string>("");

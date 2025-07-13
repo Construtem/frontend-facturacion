@@ -40,7 +40,7 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
           console.error("Error al obtener la factura:", error);
         });
     }
-    }, [isModalOpen, pdfUrl]);
+    }, [isModalOpen, pdfUrl, quoteId]);
 
   return (
     <div style={styles.container}>
