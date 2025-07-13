@@ -1,6 +1,11 @@
 // src/components/tab-wizard/Stepper.tsx
 'use client'
 
+import {
+  StepperContainerStyled,
+  StepLabelStyled
+} from "@/components/styled-components/stepper.styles";
+
 interface Step {
   id: number;
   label: string;
@@ -8,13 +13,13 @@ interface Step {
 
 export default function Stepper({currentStep, steps}: {currentStep: number, steps: Step[]}) {
   return (
-    <div style={styles.stepper}>
+    <StepperContainerStyled>
       {steps.map((step) => {
         const isDone = step.id < currentStep;
         const isCurrent = step.id === currentStep;
 
         return (
-          <div key={step.id} style={styles.step}>
+          <div key={step.id} style={styles.stepItem}>
             <div style={{
               ...styles.stepId,
               borderRadius: isCurrent ? '40%' : '50%',
@@ -31,35 +36,22 @@ export default function Stepper({currentStep, steps}: {currentStep: number, step
             }}>
               ✔
             </div>
-            <span style={{
-              ...styles.stepLabel,
-              color: isCurrent ? "#222222" : "#cacaca",
-            }}
-            >
+            <StepLabelStyled $iscurrent={isCurrent}>
               {step.label}
-            </span>
+            </StepLabelStyled>
           </div>
         );
       })}
-    </div>
+    </StepperContainerStyled>
   );
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
-  stepper: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    gap: '16px',
-    zIndex: 2,
-  },
-  step: {
+  stepItem: {
     position: 'relative',
     display: 'flex',
     flexDirection: 'row',
+    flexShrink: '0',
   },
   stepId: {
     width: '40px',
@@ -75,11 +67,5 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: 'bold',
     userSelect: 'none',
     zIndex: 3,
-  },
-  stepLabel: {
-    alignContent: 'center',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    transition: 'color 0.6s ease-in-out',
   },
 }

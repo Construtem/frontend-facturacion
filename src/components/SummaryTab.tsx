@@ -4,6 +4,11 @@ import React, { useState, useEffect } from 'react';
 import formatNumberWithSpaces from "./utilities/FormatNumberWithDots";
 import { parseShortDate } from "./utilities/ParseDate";
 import { getFacturaPdf } from '@/app/services/FacturaPdf';
+import {
+  OrangeBoxStyled,
+  OrangeBoxItemStyled,
+  FooterBoxStyled
+} from './styled-components/summaryTab.styles';
 
 interface AmountDetails {
   fecha_emision: string,
@@ -41,12 +46,12 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
     <div style={styles.container}>
       <h1 style={styles.title}>Resumen de Compra</h1>
 
-      <div style={styles.orangeBox}>
-        <div style={styles.orangeBoxItem}>N° Factura: 2899</div>
-        <div style={styles.orangeBoxItem}>Fecha de Emision: { amountDetails != undefined ? parseShortDate(amountDetails.fecha_emision) : "Error al cargar"}</div>
-        <div style={styles.orangeBoxItem}>Cliente: Cliente Ejemplo</div>
-        <div style={styles.orangeBoxItem}>Rut cliente: 12.345.678-9</div>
-      </div>
+      <OrangeBoxStyled>
+        <OrangeBoxItemStyled>N° Factura: 2899</OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>Fecha de Emision: { amountDetails != undefined ? parseShortDate(amountDetails.fecha_emision) : "Error al cargar"}</OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>Cliente: Cliente Ejemplo</OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>Rut cliente: 12.345.678-9</OrangeBoxItemStyled>
+      </OrangeBoxStyled>
 
       <div style={styles.details}>
         <p style={styles.detailText}>
@@ -62,10 +67,10 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
 
       <div style={styles.thanks}>Gracias por su compra</div>
 
-      <div style={styles.footerBox}>
+      <FooterBoxStyled>
         <div style={styles.footerItem}>S.I.I. - Santiago</div>
         <div style={styles.footerItem}>2899</div>
-      </div>
+      </FooterBoxStyled>
 
       <div style={styles.buttonContainer}>
         <button style={styles.button} onClick={openModal}>
@@ -139,42 +144,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '12px',
     fontSize: '16px',
   },
-  orangeBox: {
-    backgroundColor: '#FF7300',
-    padding: '10px',
-    margin: '0 auto 30px auto',
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    color: '#fff',
-    borderRadius: '8px',
-  },
-  orangeBoxItem: {
-    width: '45%',
-    display: 'flex',
-    alignItems: 'center',
-    paddingLeft: '10px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    height: '60px',
-  },
   thanks: {
     textAlign: 'center',
     fontSize: '16px',
     fontWeight: 'bold',
     marginBottom: '20px',
   },
-  footerBox: {
-    backgroundColor: '#FF7300',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    color: 'white',
-    alignItems: 'center',
-    borderRadius: '8px',
-  },
   footerItem: {
+    display: 'flex',
     fontWeight: 'bold',
+    height: '60px',
+    boxSizing: 'border-box',
+    alignItems: 'center',
   },
   button: {
     padding: '12px 24px',
@@ -212,6 +193,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   modalContent: {
     backgroundColor: '#fff',
     padding: '20px',
+    margin: '6px',
     maxWidth: '800px',
     width: '90%',
     height: '90%',
