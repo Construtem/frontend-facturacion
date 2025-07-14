@@ -13,8 +13,8 @@ import { getQuotePreview } from '../app/services/QuotePreviewService';
 export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
   function Header(props, ref) {
   const { id: quoteId } = useParams<{ id: string }>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-        const [responseError, setResponseError] = useState<string | null>(null);
+  //const [isLoading, setIsLoading] = useState<boolean>(true);
+        //const [responseError, setResponseError] = useState<string | null>(null);
 
         const [cotizacion, setCotizacion] = useState({
             id: "N/A",
@@ -29,12 +29,12 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
               .then((response) => {
                   // Axios devuelve los datos en `response.data`
                   setCotizacion(response.data);
-                  setIsLoading(false);
+                  //setIsLoading(false);
               })
               .catch((error) => {
                 console.error("Error al obtener la cotización:", error);
               
-                setIsLoading(false);
+                //setIsLoading(false);
               });
           }, [quoteId]);  
   return (

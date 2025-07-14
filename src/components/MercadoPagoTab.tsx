@@ -70,7 +70,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         ];
         // Se le envia formKey para que se actualizen las referencias cada vez que
         // se desmonta y monta el formulario.
-        const { fieldValidity: validatorFieldValidity, isFormValid: validatorIsFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
+        //const { fieldValidity: validatorFieldValidity, isFormValid: validatorIsFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
     
         // Estado para la validez de los campos, para poder actualizar manualmente el RUT
         const [fieldValidity, setFieldValidity] = useState<{ [key: string]: boolean | null }>({});
@@ -202,7 +202,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 });
             };
             document.body.appendChild(script);
-        }, [transaction_amount, formKey, onUpdateStep]);
+        }, [transaction_amount, formKey, onUpdateStep, cotizacion_id]);
 
         // Estado para mostrar error si se ingresan letras en el número de tarjeta
         const [cardNumberError, setCardNumberError] = useState<string>("");
@@ -212,6 +212,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         // Estado para el mensaje de validación del RUT
         const [rutValidationMsg, setRutValidationMsg] = useState<string>("");
         // Estado para el tipo de tarjeta y su icono
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const [cardType, setCardType] = useState<any>(null);
        
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
