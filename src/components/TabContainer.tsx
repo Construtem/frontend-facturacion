@@ -59,7 +59,7 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
                 onUpdateStep={onUpdateStep}
             />
         </div>
-        <div style={isVisible(2)}>
+        <div style={isVisible(4)}>
             <SummaryTab
                 quoteId={quoteId}
                 amountDetails={amountDetails}
