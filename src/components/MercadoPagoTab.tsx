@@ -7,6 +7,7 @@ import { useFormValidator } from "./utilities/FormValidator";
 import { mpvalidators, validateRutChileno } from "./utilities/Validators";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
+import { getCardType } from "./utilities/getCardType";
 
 
 
@@ -210,6 +211,8 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         const [documentType, setDocumentType] = useState<string>("RUT");
         // Estado para el mensaje de validación del RUT
         const [rutValidationMsg, setRutValidationMsg] = useState<string>("");
+        // Estado para el tipo de tarjeta y su icono
+        const [cardType, setCardType] = useState<any>(null);
        
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
         function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -231,6 +234,9 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
 
             const input = document.getElementById("form-checkout__cardNumber") as HTMLInputElement;
             if (input) input.value = value;
+            // Detectar tipo de tarjeta y actualizar icono
+            const detected = getCardType(value);
+            setCardType(detected);
         }
         // Formatea el RUT chileno visualmente y guarda el valor limpio en data-raw
         // Muestra error si se ingresan caracteres distintos de números o k/K
@@ -299,17 +305,40 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                             </h2>
                             <label style={styles.description}>
                                 Número de tarjeta
-                                <input
-                                id="form-checkout__cardNumber"
-                                style={getInputStyle("form-checkout__cardNumber")}
-                                onChange={handleCardNumberChange}
-                                placeholder="1234 5678 9012 3456"
-                                />
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        id="form-checkout__cardNumber"
+                                        style={getInputStyle("form-checkout__cardNumber")}
+                                        onChange={handleCardNumberChange}
+                                        placeholder="1234 5678 9012 3456"
+                                    />
+                                    {cardType && (
+                                        <span style={{ marginLeft: 8, fontSize: 28 }}>
+                                            <cardType.icon
+                                                style={{
+                                                    fontSize: 48,
+                                                    color:
+                                                        cardType.type === "Visa"
+                                                            ? "#2563eb" // blue-600
+                                                            : cardType.type === "Mastercard"
+                                                            ? "#ef9a19" // red-600
+                                                            : cardType.type === "American Express"
+                                                            ? "#0891b2" // cyan-600
+                                                            : cardType.type === "Coopeuch"
+                                                            ? "#be185d" // pink-700
+                                                            : cardType.type === "Scotiabank"
+                                                            ? "#e11d48" // rose-600
+                                                            : "#2d2d2d"
+                                                }}
+                                            />
+                                        </span>
+                                    )}
+                                </div>
                                 {cardNumberError && (
-                                    <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{cardNumberError}</p>
+                                    <p style={{  fontSize: "12px", marginTop: "4px" }}>{cardNumberError}</p>
                                 )}
                                 {fieldValidity["form-checkout__cardNumber"] === false && (
-                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                <p style={{  fontSize: "12px", marginTop: "4px" }}>
                                     El número de tarjeta debe tener 16 dígitos separados por espacios.
                                 </p>
                                 )}
@@ -426,6 +455,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 <select
                                     id="form-checkout__issuer"
                                     style={getInputStyle("form-checkout__issuer")}
+                                    
                                 ></select>
                                 {fieldValidity["form-checkout__issuer"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
