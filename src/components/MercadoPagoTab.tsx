@@ -7,6 +7,10 @@ import { useFormValidator } from "./utilities/FormValidator";
 import { mpvalidators, validateRutChileno } from "./utilities/Validators";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
+import {
+    FormInputStyled,
+    LogoContainerStyled
+} from "./styled-components/mercadoPagoTab.styles";
 import { getCardType } from "./utilities/getCardType";
 
 
@@ -56,6 +60,24 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 return statusMessage;
             },
         }));
+
+        // Estado para controlar el logo de mercado pago segun el tamaño horizontal
+        const [isTooStretched, setIsTooStretched] = useState(false);
+
+        useEffect(() => {
+            const handleResize = () => {
+                setIsTooStretched(window.innerWidth < 512);
+            };
+
+            window.addEventListener('resize', handleResize);
+
+            // Ejecuta una vez para inicializar valores
+            handleResize();
+
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }, []);
     
         const [showOverlay, setShowOverlay] = useState(false);
         const [isLoading, setIsLoading] = useState(false);
@@ -295,7 +317,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                         procesar tu compra de forma segura.
                     </p>
                     <div style={styles.doubleColumn}>
-                        <div style={styles.formInputs}>
+                        <FormInputStyled>
                             <h2
                                 style={{
                                     ...styles.title,
@@ -465,15 +487,19 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 )}
                             </label>
                             <select id="form-checkout__installments" style={{ display: 'none' }}></select>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-                            <Image
-                                src={mplogo}
-                                alt="Mercado Pago logo"
-                                style={{ ...styles.logoImg, objectFit: 'contain' }}
-                                draggable={false}
-                            />
-                        </div>
+                        </FormInputStyled>
+                        { !isTooStretched && 
+                            <LogoContainerStyled>
+                                <div style={{ position: 'relative', alignContent: 'center' }}>
+                                    <Image
+                                        src={mplogo}
+                                        alt="Mercado Pago logo"
+                                        style={{ ...styles.logoImg, objectFit: 'contain' }}
+                                        draggable={false}
+                                    />
+                                </div>
+                            </LogoContainerStyled>
+                        }
                     </div>
                     <div style={styles.buttonContainerMp}>
                         <button
@@ -497,6 +523,21 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                         </button>
                     </div>
                 </form>
+                { isTooStretched &&
+                        <>
+                            <hr style={styles.line} />
+                            <LogoContainerStyled>
+                                <div style={{ display: 'flex', justifyContent: 'center', width: '70%' }}>
+                                    <Image
+                                        src={mplogo}
+                                        alt="Mercado Pago logo"
+                                        style={{ ...styles.logoImg, objectFit: 'contain' }}
+                                        draggable={false}
+                                    />
+                                </div>
+                            </LogoContainerStyled>
+                        </>
+                    }
                 {showOverlay && (
                     <div style={styles.overlay}>
                         <p style={styles.title}>Procesando tu pago...</p>
@@ -539,7 +580,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         height: 'auto',
         maxHeight: '90px',
         objectFit: 'contain',
-        width: 'auto',
+        width: '100%',
     },
     form: {
         display: 'flex',
@@ -550,16 +591,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: 'flex',
         flexDirection: 'row',
         gap: '16px',
-    },
-    formInputs: {
-        position: 'relative',
-        width: '50%',
-        marginBottom: '32px',
-        padding: '16px',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        backgroundColor: '#f9fafb',
-        boxSizing: 'border-box',
+        alignItems: 'stretch',
     },
     input: {
         padding: '10px',
@@ -590,6 +622,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     buttonMp: {
         padding: '12px 24px',
+        boxSizing: 'border-box',
         border: 'none',
         borderRadius: '8px',
         backgroundColor: '#FF7300',

@@ -4,6 +4,7 @@
 
 import { useRef, useLayoutEffect, useState } from "react";
 import Header from "@/components/Header";
+import { LayoutChildrenStyled } from "@/components/styled-components/layout.styles";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     const headerRef = useRef<HTMLDivElement | null>(null);
@@ -44,9 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <body style={styles.body}>
                     <Header ref={headerRef} />
                     <div style={{ height: headerHeight }} />
-                    <div style={styles.children}>
+                    <LayoutChildrenStyled>
                         {children}
-                    </div>
+                    </LayoutChildrenStyled>
                 </body>
             </html>
         </>
@@ -59,9 +60,5 @@ const styles: { [key: string]: React.CSSProperties } = {
         color: '#222222',
         fontFamily: '"Roboto", sans-serif',
         fontSize: '16px',
-    },
-    children: {
-        position: 'relative',
-        margin: '48px',
-    },
+    }
 }

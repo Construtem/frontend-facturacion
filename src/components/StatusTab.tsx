@@ -113,7 +113,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: "space-between",
-        padding: '40px',
+        padding: '40px 0px',
         overflowY: 'auto',
         minHeight: '500px',
         width: 'auto',
