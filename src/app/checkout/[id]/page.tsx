@@ -1,7 +1,7 @@
 // src/app/checkout/page.tsx
 'use client'
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from 'next/image';
 import logo from '@/assets/images/logo.png';
