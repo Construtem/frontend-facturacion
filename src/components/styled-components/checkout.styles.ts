@@ -31,23 +31,19 @@ export const ContainerWrapperStyled = styled.div`
 export const WizardContainerStyled = styled.div`
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background-color: #f0f0f0;
   padding: 32px;
   border-radius: 16px;
   box-sizing: border-box;
   gap: 32px;
-  overflow-x: hidden;
-
-  @media (min-width: 768px) and (max-width: 1023px) {
-    flex-direction: row;
-    overflow-x: auto;
-  }
+  overflow-x: auto;
 
   @media (min-width: 1024px) {
     width: 30%;
     flex-direction: column;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 `;
 

@@ -1,6 +1,7 @@
 // src/components/tab-wizard/Stepper.tsx
 'use client'
 
+import { useEffect, useState } from "react";
 import {
   StepperContainerStyled,
   StepLabelStyled
@@ -8,10 +9,30 @@ import {
 
 interface Step {
   id: number;
-  label: string;
+  labelLarge: string;
+  labelShort: string;
 }
 
 export default function Stepper({currentStep, steps}: {currentStep: number, steps: Step[]}) {
+
+  // Determinar si es móvil o no
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isTablet, setIsTablet] = useState<boolean>(false);
+
+  // Detectar el tamaño de la pantalla
+  useEffect(() => {
+      const checkSize = () => {
+          const innerWidth = window.innerWidth;
+          setIsMobile(innerWidth <= 767);
+          setIsTablet(innerWidth >= 768 && innerWidth <= 1023);
+      };
+
+      checkSize(); // Verificar en primer render
+      window.addEventListener('resize', checkSize);
+
+      return () => window.removeEventListener('resize', checkSize);
+  }, []);
+
   return (
     <StepperContainerStyled>
       {steps.map((step) => {
@@ -37,7 +58,12 @@ export default function Stepper({currentStep, steps}: {currentStep: number, step
               ✔
             </div>
             <StepLabelStyled $iscurrent={isCurrent}>
-              {step.label}
+              {(isMobile || isTablet) ? (
+                  step.labelShort
+                ) : (
+                  step.labelLarge
+                )
+              }
             </StepLabelStyled>
           </div>
         );

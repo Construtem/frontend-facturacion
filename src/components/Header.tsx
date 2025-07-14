@@ -22,7 +22,6 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
 
         <div style={styles.right}>
           <span style={styles.userInfo}>
-            <span style={styles.userRole}>Usuario</span>
             <span style={styles.userIcon}>👤</span>
             <span style={styles.userText}>
               <span style={styles.userName}>Usuario</span>

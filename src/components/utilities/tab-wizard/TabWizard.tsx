@@ -6,7 +6,8 @@ import ProgressBar from "./ProgressBar";
 
 interface Step {
   id: number;
-  label: string;
+  labelLarge: string;
+  labelShort: string;
 }
 
 export default function TabWizard({steps, currentStep}: {steps: Step[], currentStep: number}) {

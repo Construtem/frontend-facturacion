@@ -16,7 +16,8 @@ import {
 
 interface Step {
   id: number;
-  label: string;
+  labelLarge: string;
+  labelShort: string;
 }
 
 export default function Checkout() {
@@ -24,10 +25,10 @@ export default function Checkout() {
 
     // Pasos del proceso de checkout
     const steps: Step[] = [
-        { id: 1, label: "Detalles de pago" },
-        { id: 2, label: "Detalles de tarjeta" },
-        { id: 3, label: "Estado de pago" },
-        { id: 4, label: "Resumen" }, 
+        { id: 1, labelLarge: "Detalles de pago", labelShort: "Detalles" },
+        { id: 2, labelLarge: "Detalles de tarjeta", labelShort: "Tarjeta" },
+        { id: 3, labelLarge: "Estado de pago", labelShort: "Estado" },
+        { id: 4, labelLarge: "Resumen", labelShort: "Resumen" }, 
     ];
 
     // Paso actual del checkout
@@ -35,16 +36,14 @@ export default function Checkout() {
 
     // Determinar si es móvil o no
     const [isMobile, setIsMobile] = useState<boolean>(false);
-    const [isOpen, setIsOpen] = useState(false)
-    const touchStartX = useRef<number | null>(null);
-    const touchEndX = useRef<number | null>(null);
-    const touchStartY = useRef<number | null>(null);
-    const touchEndY = useRef<number | null>(null);
+    const [isTablet, setIsTablet] = useState<boolean>(false);
 
     // Detectar el tamaño de la pantalla
     useEffect(() => {
         const checkSize = () => {
-            setIsMobile(window.innerWidth <= 767);
+            const innerWidth = window.innerWidth;
+            setIsMobile(innerWidth <= 767);
+            setIsTablet(innerWidth >= 768 && innerWidth <= 1023);
         };
 
         checkSize(); // Verificar en primer render
@@ -53,83 +52,16 @@ export default function Checkout() {
         return () => window.removeEventListener('resize', checkSize);
     }, []);
 
-    // Detectar gestos de swipe en móviles
-    useEffect(() => {
-        if (!isMobile) return;
-
-        // Manejar el inicio y fin del toque
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartX.current = e.touches[0].clientX;
-            touchStartY.current = e.touches[0].clientY;
-        };
-
-        const handleTouchEnd = (e: TouchEvent) => {
-            touchEndX.current = e.changedTouches[0].clientX;
-            touchEndY.current = e.changedTouches[0].clientY;
-            const threshold = 50; // px mínimo para ser considerado swipe
-            let deltaY = 0;
-
-            // Calcular la diferencia de Y
-            if (touchStartY.current !== null && touchEndY.current !== null) {
-                deltaY = Math.abs(touchEndY.current - touchStartY.current);
-            }
-
-            // Calcular la diferencia de X
-            if (deltaY < threshold && touchStartX.current !== null && touchEndX.current !== null) {
-                const deltaX = touchEndX.current - touchStartX.current;
-
-                if (deltaX > threshold) {
-                    setIsOpen(true);
-                } else if (deltaX < -threshold) {
-                    setIsOpen(false);
-                }
-            }
-            touchStartX.current = null;
-            touchEndX.current = null;
-        };
-
-        window.addEventListener('touchstart', handleTouchStart);
-        window.addEventListener('touchend', handleTouchEnd);
-
-        return () => {
-            window.removeEventListener('touchstart', handleTouchStart);
-            window.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, [isMobile]);
-
     return (
         <PageContainerStyled>
             <ContainerWrapperStyled>
                 <WizardContainerStyled>
-                    <div style={styles.logoContainer}>
-                        <Image src={logo} alt="Logo de la empresa" style={styles.logo} />
-                    </div>
-                    {isMobile ? (
-                    <div 
-                        style={{
-                            ...styles.mobileAcorddion,
-                            width: isOpen ? '260px' : '48px',
-                            padding: isOpen ? '16px' : '16px 4px',
-                        }}
-                    >
-                        <div
-                            onClick={() => setIsOpen(prev => !prev)}
-                            style={styles.buttonAcorddion}
-                        >
-                            {isOpen ? '◀' : '▶'}
+                    {(!isMobile && !isTablet) &&
+                        <div style={styles.logoContainer}>
+                            <Image src={logo} alt="Logo de la empresa" style={styles.logo} />
                         </div>
-                        <div
-                            style={{
-                                ...styles.mobileTabWizard,
-                                display: isOpen ? 'block' : 'none',
-                            }}
-                        >
-                            <TabWizard steps={steps} currentStep={currentStep} />
-                        </div>
-                    </div>
-                    ) : (
-                        <TabWizard steps={steps} currentStep={currentStep} />
-                    )}
+                    }
+                    <TabWizard steps={steps} currentStep={currentStep} />
                 </WizardContainerStyled>
                 <TabContainerStyled>
                     <TabContainer quoteId={Number(quoteId)} currentStep={currentStep} onUpdateStep={setCurrentStep} />
