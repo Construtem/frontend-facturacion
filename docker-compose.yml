@@ -7,6 +7,9 @@ services:
       # El contexto de construcción es el directorio actual (donde se encuentra este docker-compose.yml y el Dockerfile).
       context: .
       dockerfile: Dockerfile 
+      args:
+        DEV_BACKEND_URLS: ${DEV_BACKEND_URLS}
+        NEXT_PUBLIC_TOKEN_MERCADOPAGO: ${NEXT_PUBLIC_TOKEN_MERCADOPAGO}
     
     # El puerto 3000 del host se mapea al puerto 3000 del contenedor,
     # permitiendo acceder a tu aplicación desde tu máquina local (ej. http://localhost:3000).
@@ -20,8 +23,5 @@ services:
     # Útil para desarrollo si el contenedor falla, pero puedes ajustarlo según tu preferencia.
     restart: unless-stopped
 
-    env_file:
-      - .env.local
-    
-    env_file:
-      - .env.local
+    #env_file:
+    #  - .env.local
