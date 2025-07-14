@@ -1,14 +1,43 @@
 // src/components/Header.tsx
 "use client";
 
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import Image from "next/image";
 import logo from "@/assets/images/logo.png";
+import { useParams } from "next/navigation";
+import { getQuotePreview } from '../app/services/QuotePreviewService';
+
+
+
 
 export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
   function Header(props, ref) {
+  const { id: quoteId } = useParams<{ id: string }>();
+  //const [isLoading, setIsLoading] = useState<boolean>(true);
+        //const [responseError, setResponseError] = useState<string | null>(null);
 
-    return (
+        const [cotizacion, setCotizacion] = useState({
+            id: "N/A",
+            fecha_emision: "N/A",
+            subtotal: 0,
+            impuesto: 0,
+            total: 0,
+            usuario:  { email: '', nombre: '' },
+        });
+  useEffect(() => {
+              getQuotePreview(Number(quoteId))
+              .then((response) => {
+                  // Axios devuelve los datos en `response.data`
+                  setCotizacion(response.data);
+                  //setIsLoading(false);
+              })
+              .catch((error) => {
+                console.error("Error al obtener la cotización:", error);
+              
+                //setIsLoading(false);
+              });
+          }, [quoteId]);  
+  return (
       <header ref={ref} style={styles.header}>
         <div style={styles.left}>
           <div style={styles.logoContainer}>
@@ -22,16 +51,16 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
 
         <div style={styles.right}>
           <span style={styles.userInfo}>
-            <span style={styles.userRole}>Usuario</span>
             <span style={styles.userIcon}>👤</span>
             <span style={styles.userText}>
-              <span style={styles.userName}>Usuario</span>
-              <span style={styles.userEmail}>correo@example.com</span>
+              <span style={styles.userName}>{cotizacion.usuario.nombre}</span>
+              <span style={styles.userEmail}>{cotizacion.usuario.email}</span>
             </span>
           </span>
         </div>
       </header>
     );
+    
   }
 );
 

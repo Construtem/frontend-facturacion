@@ -16,5 +16,6 @@ export const postPayment_MercadoPago = async (data: paymentData) => {
         email: data.cardholderEmail,
         id: data.cotizacionId,
     });
+
     return response;
 };
