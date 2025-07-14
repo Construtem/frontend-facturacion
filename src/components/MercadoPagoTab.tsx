@@ -4,13 +4,15 @@
 import { useEffect, useState, forwardRef, useImperativeHandle, FormEvent  } from "react";
 import { postPayment_MercadoPago } from "@/app/services/Payment_MercadoPago";
 import { useFormValidator } from "./utilities/FormValidator";
-import { mpvalidators } from "./utilities/Validators";
+import { mpvalidators, validateRutChileno } from "./utilities/Validators";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
 import {
     FormInputStyled,
     LogoContainerStyled
 } from "./styled-components/mercadoPagoTab.styles";
+import { getCardType } from "./utilities/getCardType";
+
 
 
 export interface MercadoPagoHandle {
@@ -90,7 +92,17 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         ];
         // Se le envia formKey para que se actualizen las referencias cada vez que
         // se desmonta y monta el formulario.
-        const { fieldValidity, isFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
+        //const { fieldValidity: validatorFieldValidity, isFormValid: validatorIsFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
+    
+        // Estado para la validez de los campos, para poder actualizar manualmente el RUT
+        const [fieldValidity, setFieldValidity] = useState<{ [key: string]: boolean | null }>({});
+        const [isFormValid, setIsFormValid] = useState(false);
+        // Hook de validación, sincroniza con el estado local
+        const validatorResult = useFormValidator(fieldIds, mpvalidators, formKey);
+        useEffect(() => {
+            setFieldValidity(validatorResult.fieldValidity);
+            setIsFormValid(validatorResult.isFormValid);
+        }, [validatorResult.fieldValidity, validatorResult.isFormValid]);
     
         function getInputStyle(fieldId: string) {
             return fieldValidity[fieldId] === false ? styles.inputError : styles.input;
@@ -218,41 +230,65 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         const [cardNumberError, setCardNumberError] = useState<string>("");
         const [cvvError, setCvvError] = useState<string>("");
         // Estado para el tipo de documento, se usa para el RUT chileno
-        const [documentType, setDocumentType] = useState<string>("");
+        const [documentType, setDocumentType] = useState<string>("RUT");
+        // Estado para el mensaje de validación del RUT
+        const [rutValidationMsg, setRutValidationMsg] = useState<string>("");
+        // Estado para el tipo de tarjeta y su icono
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const [cardType, setCardType] = useState<any>(null);
        
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
         function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
             if (/[^\d\s]/.test(e.target.value)) {
-                setCardNumberError("Solo se permiten números en este campo");
+            setCardNumberError("Solo se permiten números en este campo");
             } else {
-                setCardNumberError("");
+            setCardNumberError("");
             }
             let value = e.target.value.replace(/\D/g, ""); // Solo dígitos
             value = value.substring(0, 16); // Máximo 16 dígitos
-            value = value.replace(/(.{4})/g, "$1 ").trim(); // Espacio cada 4 dígitos
+
+            if (value.length === 15) {
+            // Espacio cada 2 dígitos para tarjetas de 15 dígitos (ej. American Express)
+            value = value.replace(/^(\d{4})(\d{6})(\d{5})$/, "$1 $2 $3");
+            } else {
+            // Espacio cada 4 dígitos para tarjetas de 16 dígitos
+            value = value.replace(/(.{4})/g, "$1 ").trim();
+            }
+
             const input = document.getElementById("form-checkout__cardNumber") as HTMLInputElement;
             if (input) input.value = value;
+            // Detectar tipo de tarjeta y actualizar icono
+            const detected = getCardType(value);
+            setCardType(detected);
         }
         // Formatea el RUT chileno visualmente y guarda el valor limpio en data-raw
         // Muestra error si se ingresan caracteres distintos de números o k/K
         function handleRutChange(e: React.ChangeEvent<HTMLInputElement>) {
-            /*let value = e.target.value.replace(/[^0-9kK]/g, ''); // Solo números y k/K
-            value = value.slice(0, 9); // Máximo 9 caracteres
-            e.target.value = value;*/
             let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
             value = value.slice(0, 9); // Limita a 9 caracteres
-            // Separa dígito verificador
-            //let body = value.slice(0, -1);
-            //const dv = value.slice(-1);
-            // Formatea con puntos cada 3 dígitos desde la derecha
-            //body = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            // Une con guion si hay dígito verificador
-            //const visual = dv ? `${body}-${dv}` : body;
-            e.target.value = value; // antes era  = visual;
-            // Guarda el valor limpio en data-raw
-            // e.target.setAttribute('data-raw', value);
-            
-          
+            e.target.value = value;
+            // Valida el RUT visualmente si el tipo de documento es RUT
+            if (documentType === "RUT" && value.length >= 8) {
+                if (validateRutChileno(value)) {
+                    setRutValidationMsg("RUT válido");
+                    setFieldValidity(prev => ({
+                        ...prev,
+                        ["form-checkout__identificationNumber"]: true
+                    }));
+                } else {
+                    setRutValidationMsg("RUT inválido, verifique el digito verificador");
+                    setFieldValidity(prev => ({
+                        ...prev,
+                        ["form-checkout__identificationNumber"]: false
+                    }));
+                }
+            } else {
+                setRutValidationMsg("");
+                setFieldValidity(prev => ({
+                    ...prev,
+                    ["form-checkout__identificationNumber"]: null
+                }));
+            }
         }
         // Solo letras y espacios para nombre del titular
         function handleCardholderNameChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -292,17 +328,40 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                             </h2>
                             <label style={styles.description}>
                                 Número de tarjeta
-                                <input
-                                id="form-checkout__cardNumber"
-                                style={getInputStyle("form-checkout__cardNumber")}
-                                onChange={handleCardNumberChange}
-                                placeholder="1234 5678 9012 3456"
-                                />
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        id="form-checkout__cardNumber"
+                                        style={getInputStyle("form-checkout__cardNumber")}
+                                        onChange={handleCardNumberChange}
+                                        placeholder="1234 5678 9012 3456"
+                                    />
+                                    {cardType && (
+                                        <span style={{ marginLeft: 8, fontSize: 28 }}>
+                                            <cardType.icon
+                                                style={{
+                                                    fontSize: 48,
+                                                    color:
+                                                        cardType.type === "Visa"
+                                                            ? "#2563eb" // blue-600
+                                                            : cardType.type === "Mastercard"
+                                                            ? "#ef9a19" // red-600
+                                                            : cardType.type === "American Express"
+                                                            ? "#0891b2" // cyan-600
+                                                            : cardType.type === "Coopeuch"
+                                                            ? "#be185d" // pink-700
+                                                            : cardType.type === "Scotiabank"
+                                                            ? "#e11d48" // rose-600
+                                                            : "#2d2d2d"
+                                                }}
+                                            />
+                                        </span>
+                                    )}
+                                </div>
                                 {cardNumberError && (
-                                    <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{cardNumberError}</p>
+                                    <p style={{  fontSize: "12px", marginTop: "4px" }}>{cardNumberError}</p>
                                 )}
                                 {fieldValidity["form-checkout__cardNumber"] === false && (
-                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                <p style={{  fontSize: "12px", marginTop: "4px" }}>
                                     El número de tarjeta debe tener 16 dígitos separados por espacios.
                                 </p>
                                 )}
@@ -390,8 +449,17 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                     onChange={handleRutChange}
                                     placeholder="12.345.678-K"
                                 />
-                                
-                                {fieldValidity["form-checkout__identificationNumber"] === false && (
+                                {documentType === "RUT" && rutValidationMsg && (
+                                    <p style={{ color: rutValidationMsg === "RUT válido" ? "green" : "red", fontSize: "12px", marginTop: "4px" }}>
+                                        {rutValidationMsg}
+                                    </p>
+                                )}
+                                {fieldValidity["form-checkout__identificationNumber"] === false && documentType === "RUT" && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    El RUT ingresado no es válido. Verifique el dígito verificador.
+                                </p>
+                                )}
+                                {fieldValidity["form-checkout__identificationNumber"] === false && documentType !== "RUT" && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
                                     El número de documento no puede ser vacío ni menor a 9 caracteres.
                                 </p>
@@ -410,6 +478,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 <select
                                     id="form-checkout__issuer"
                                     style={getInputStyle("form-checkout__issuer")}
+                                    
                                 ></select>
                                 {fieldValidity["form-checkout__issuer"] === false && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>

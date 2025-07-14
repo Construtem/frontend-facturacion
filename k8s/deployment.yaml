@@ -5,7 +5,7 @@ metadata:
   labels:
     app: front-facturacion
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: front-facturacion
@@ -21,9 +21,6 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
-          envFrom:
-            - secretRef:
-                name: front-facturacion-secrets
           resources:
             requests:
               memory: "128Mi"

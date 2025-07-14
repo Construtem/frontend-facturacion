@@ -7,7 +7,7 @@ export const GET = async (req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     
     const res = await api.get(`${process.env.DEV_BACKEND_URL}api/cotizacion/${id}`);
-
+    console.log('Response from backend:', res.data); // Debugging log
     return NextResponse.json(res.data, { status: res.status });
   } catch (err: unknown) {
     if (isAxiosError(err)) {
