@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile 
       args:
-        DEV_BACKEND_URLS: ${DEV_BACKEND_URLS}
+        DEV_BACKEND_URL: ${DEV_BACKEND_URL}
         NEXT_PUBLIC_TOKEN_MERCADOPAGO: ${NEXT_PUBLIC_TOKEN_MERCADOPAGO}
     
     # El puerto 3000 del host se mapea al puerto 3000 del contenedor,
