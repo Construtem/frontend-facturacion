@@ -20,12 +20,12 @@ export const GET = async (req: NextRequest, { params }: { params: Promise<{ id: 
   } catch (err: unknown) {
     if (isAxiosError(err)) {
       const status = err.response?.status || 500;
-      const message = err.response?.data || { error: ['Error inesperado al obtener la factura'] };
+      const message = err.response?.data || { error: ['Error inesperado al obtener la guía de despacho'] };
       return NextResponse.json(message, { status });
     }
 
     return NextResponse.json(
-      { error: ['Error inesperado al obtener la factura'] },
+      { error: ['Error inesperado al obtener la guía de despacho'] },
       { status: 500 }
     );
   }

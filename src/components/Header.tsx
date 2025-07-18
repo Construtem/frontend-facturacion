@@ -6,7 +6,7 @@ import Image from "next/image";
 import logo from "@/assets/images/logo.png";
 import { useParams } from "next/navigation";
 import { getQuotePreview } from '../app/services/QuotePreviewService';
-
+import Link from 'next/link';
 
 
 
@@ -41,11 +41,13 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
       <header ref={ref} style={styles.header}>
         <div style={styles.left}>
           <div style={styles.logoContainer}>
-            <Image
-              src={logo}
-              alt="ConstrUTEM Logo"
-              style={styles.logoImg}
-            />
+            <Link href={process.env.NEXT_PUBLIC_VENTAS_URL!}>
+              <Image
+                src={logo}
+                alt="ConstrUTEM Logo"
+                style={styles.logoImg}
+              />
+            </Link>
           </div>
         </div>
 
