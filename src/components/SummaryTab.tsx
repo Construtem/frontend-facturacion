@@ -9,6 +9,7 @@ import {
   OrangeBoxItemStyled,
   FooterBoxStyled
 } from './styled-components/summaryTab.styles';
+import { getPaymentData } from '@/app/services/Summary-call';
 
 interface AmountDetails {
   fecha_emision: string,
@@ -17,13 +18,35 @@ interface AmountDetails {
   total: number,
 }
 
+interface CotizacionData {
+  numero_factura: number;
+  nombre_cliente: string;
+  empresa: string;
+  rut_cliente: string;
+}
+
 export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | undefined, amountDetails: AmountDetails | undefined}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [cotizacionData, setCotizacionData] = useState<CotizacionData | null>(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Obtener datos de cotización del backend
+  useEffect(() => {
+    if (quoteId !== undefined) {
+      getPaymentData(Number(quoteId))
+        .then((response) => {
+          setCotizacionData(response.data);
+        })
+        .catch((error) => {
+          console.error("Error al obtener los datos de la cotización:", error);
+        });
+    }
+  }, [quoteId]);
+
+  // Obtener PDF solo cuando se abre el modal
   useEffect(() => {
     if (isModalOpen && quoteId !== undefined && pdfUrl == null) {
       getFacturaPdf(Number(quoteId))
@@ -47,10 +70,21 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
       <h1 style={styles.title}>Resumen de Compra</h1>
 
       <OrangeBoxStyled>
-        <OrangeBoxItemStyled>N° Factura: 2899</OrangeBoxItemStyled>
-        <OrangeBoxItemStyled>Fecha de Emision: { amountDetails != undefined ? parseShortDate(amountDetails.fecha_emision) : "Error al cargar"}</OrangeBoxItemStyled>
-        <OrangeBoxItemStyled>Cliente: Cliente Ejemplo</OrangeBoxItemStyled>
-        <OrangeBoxItemStyled>Rut cliente: 12.345.678-9</OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>
+          N° Factura: {cotizacionData ? cotizacionData.numero_factura : "Cargando..."}
+        </OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>
+          Fecha de Emision: {amountDetails ? parseShortDate(amountDetails.fecha_emision) : "Error al cargar"}
+        </OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>
+          Cliente: {cotizacionData ? cotizacionData.nombre_cliente : "Cargando..."}
+        </OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>
+          Rut cliente: {cotizacionData ? cotizacionData.rut_cliente : "Cargando..."}
+        </OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>
+          Empresa: {cotizacionData ? cotizacionData.empresa : "Cargando..."}
+        </OrangeBoxItemStyled>
       </OrangeBoxStyled>
 
       <div style={styles.details}>
@@ -69,7 +103,7 @@ export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | 
 
       <FooterBoxStyled>
         <div style={styles.footerItem}>S.I.I. - Santiago</div>
-        <div style={styles.footerItem}>2899</div>
+        <div style={styles.footerItem}>{cotizacionData ? cotizacionData.numero_factura : ""}</div>
       </FooterBoxStyled>
 
       <div style={styles.buttonContainer}>
