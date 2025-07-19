@@ -61,7 +61,9 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
         </div>
         <div style={isVisible(4)}>
             <SummaryTab
-                quoteId={quoteId}
+                status={status}
+                previewQuoteId='3' // Temporal para debug
+                isPagado={false} // Temporal para debug
                 amountDetails={amountDetails}
             />
         </div>
