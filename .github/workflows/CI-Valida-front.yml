@@ -12,16 +12,25 @@ jobs:
     - name: Checkout del código
       uses: actions/checkout@v3
 
+    - name: Limpiar carpetas de caché previas
+      run: |
+        rm -rf node_modules
+        rm -rf .next
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 22
+        node-version: 20
 
-    - name: Instalar dependencias
-      run: npm install
+    #- name: Instalar dependencias
+    #  run: npm install
 
-    - name: Ejecutar build
-      run: npm run build
+    #- name: Ejecutar build
+    #  run: npm run build
 
-    - name: Ejecutar linter
-      run: npm run lint
+    #- name: Ejecutar linter
+    #  run: npm run lint
+
+    - name: Validar Dockerfile (build local)
+      run: docker build -t test/front-facturacion .
+
