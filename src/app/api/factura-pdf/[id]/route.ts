@@ -20,12 +20,12 @@ export const GET = async (req: NextRequest, { params }: { params: Promise<{ id: 
   } catch (err: unknown) {
     if (isAxiosError(err)) {
       const status = err.response?.status || 500;
-      const message = err.response?.data || { error: ['Error inesperado al obtener la cotizacion'] };
+      const message = err.response?.data || { error: ['Error inesperado al obtener la factura'] };
       return NextResponse.json(message, { status });
     }
 
     return NextResponse.json(
-      { error: ['Error inesperado al obtener la cotizacion'] },
+      { error: ['Error inesperado al obtener la factura'] },
       { status: 500 }
     );
   }
