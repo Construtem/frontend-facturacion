@@ -5,7 +5,6 @@ import formatNumberWithSpaces from "./utilities/FormatNumberWithDots";
 import Link from 'next/link';
 import { parseShortDate } from "./utilities/ParseDate";
 import { getFacturaPdf } from '@/app/services/FacturaPdf';
-import { getDespachoPdf } from '@/app/services/DespachoPdf';
 import {
   OrangeBoxStyled,
   OrangeBoxItemStyled,
@@ -37,7 +36,6 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [facturaPdf, setFacturaPdf] = useState<string | null>(null);
-  const [despachoPdf, setDespachoPdf] = useState<string | null>(null);
   const [cotizacionData, setCotizacionData] = useState<CotizacionData | null>(null);
 
   const openModal = () => setIsModalOpen(true);
@@ -74,23 +72,8 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
           console.error("Error al obtener la factura:", error);
         });
       } else { setPdfUrl(facturaPdf) }
-      if (despachoPdf === null) {
-        getDespachoPdf(Number(previewQuoteId))
-        .then((response) => {
-          const pdfBytes = new Uint8Array(response.data);
-          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-          const url = URL.createObjectURL(blob);
-          setDespachoPdf(url);
-
-          // Limpieza
-          return () => URL.revokeObjectURL(url);
-        })
-        .catch((error) => {
-          console.error("Error al obtener la guía de despacho:", error);
-        });
-      } else { setPdfUrl(despachoPdf) }
     }
-  }, [isModalOpen, facturaPdf, despachoPdf, previewQuoteId, isPagado, status]);
+  }, [isModalOpen, facturaPdf, previewQuoteId, isPagado, status]);
 
   return (
     <div style={styles.container}>
@@ -133,9 +116,6 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
         <div style={styles.footerItem}>{cotizacionData ? cotizacionData.numero_factura : ""}</div>
       </FooterBoxStyled>
       <ButtonContainerStyled>
-        <button style={styles.button} onClick={openModal}>
-          Ver Guía de Despacho
-        </button>
         <button style={styles.button} onClick={openModal}>
           Ver Factura
         </button>
