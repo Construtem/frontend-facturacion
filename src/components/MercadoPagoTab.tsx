@@ -50,6 +50,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         
         const [formKey, setFormKey] = useState<number>(0);
         const [status, setStatus] = useState<string>("");
+        const [isMounted, setIsMounted] = useState<boolean>(false);
         const [statusMessage, setStatusMessage] = useState<string>("");
 
         useImperativeHandle(ref, () => ({
@@ -78,6 +79,40 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 window.removeEventListener('resize', handleResize);
             };
         }, []);
+
+        // Saca datos del issuer
+        useEffect(() => {
+            const selectElement = document.getElementById('form-checkout__issuer');
+
+            if (!(selectElement instanceof HTMLSelectElement)) return;
+
+            const updateIssuer = () => {
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                if (selectedOption) {
+                    setIssuer(selectedOption.text);
+                }
+            };
+
+            // Llama una vez al montar
+            updateIssuer();
+
+            // Observa cambios en las opciones del select (Cuando se agrega la tarjeta)
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList') {
+                        updateIssuer();
+                        break;
+                    }
+                }
+            });
+
+            observer.observe(selectElement, { childList: true });
+
+            // Limpieza
+            return () => {
+                observer.disconnect();
+            };
+        }, [isMounted]);
     
         const [showOverlay, setShowOverlay] = useState(false);
         const [isLoading, setIsLoading] = useState(false);
@@ -177,7 +212,11 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                     callbacks: {
                         onFormMounted: (error: Error | null) => {
                             if (error) {
+                                setIsMounted(false);
                                 return console.warn('Error en el formulario:', error);
+                            } else {
+                                setIsMounted(true);
+                                console.log("se esta pagando:", integerAmount, " pesos");
                             }
                         },
                         onSubmit: async (e: FormEvent<HTMLFormElement>) => {
@@ -477,7 +516,11 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 }}
                             > Datos del emisor:
                             </h2>
-                            <select id="form-checkout__issuer" style={{ display: 'none' }}></select>
+                            <label style={styles.description}>
+                                <strong>Emisor de la tarjeta: </strong>
+                                <select id="form-checkout__issuer" style={{ display: 'none' }}></select>
+                                <span>{issuer}</span>
+                            </label>
                             <select id="form-checkout__installments" style={{ display: 'none' }}></select>
                         </FormInputStyled>
                         { !isTooStretched && 
