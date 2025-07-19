@@ -68,16 +68,16 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
 
             {!isTooStretched && (
               <span style={styles.userText}>
-                <span style={styles.userName}>{usuario.nombre ?? '..Error'}</span>
-                <span style={styles.userEmail}>{usuario.email ?? '..Error'}</span>
+                <span style={styles.userName}>{usuario.nombre}</span>
+                <span style={styles.userEmail}>{usuario.email}</span>
               </span>
             )}
 
             {isTooStretched && isOpen && (
               <div style={styles.floatingBox}>
                 <span style={styles.userText}>
-                  <span style={styles.userName}>{usuario.nombre ?? '..Error'}</span>
-                  <span style={styles.userEmail}>{usuario.email ?? '..Error'}</span>
+                  <span style={styles.userName}>{usuario.nombre}</span>
+                  <span style={styles.userEmail}>{usuario.email}</span>
                 </span>
               </div>
             )}
