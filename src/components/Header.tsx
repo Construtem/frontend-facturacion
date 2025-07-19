@@ -48,7 +48,7 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
       <header ref={ref} style={styles.header}>
         <div style={styles.left}>
           <div style={styles.logoContainer}>
-            <Link href={process.env.NEXT_PUBLIC_VENTAS_URL!}>
+            <Link href={process.env.NEXT_PUBLIC_VENTAS_URL || ''}>
               <Image
                 src={logo}
                 alt="ConstrUTEM Logo"

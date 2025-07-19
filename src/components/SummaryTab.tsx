@@ -119,7 +119,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
         <button style={styles.button} onClick={openModal}>
           Ver Factura
         </button>
-        <Link href={process.env.NEXT_PUBLIC_VENTAS_URL!} style={styles.button}>
+        <Link href={process.env.NEXT_PUBLIC_VENTAS_URL || ''} style={styles.button}>
           Siguiente
         </Link>
       </ButtonContainerStyled>
