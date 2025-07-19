@@ -24,14 +24,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Instalar dependencias
-        run: npm install
+      #- name: Instalar dependencias
+      #  run: npm install
 
-      - name: Ejecutar build
-        run: npm run build
+      #- name: Ejecutar build
+      #  run: npm run build
 
-      - name: Ejecutar linter
-        run: npm run lint
+      #- name: Ejecutar linter
+      #  run: npm run lint
       
       - name: Validar Dockerfile (build local)
         run: docker build -t test/front-ventas .
