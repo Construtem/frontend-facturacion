@@ -6,56 +6,82 @@ import Image from "next/image";
 import logo from "@/assets/images/logo.png";
 import { useParams } from "next/navigation";
 import { getQuotePreview } from '../app/services/QuotePreviewService';
-
+import Link from 'next/link';
 
 
 
 export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
   function Header(props, ref) {
   const { id: quoteId } = useParams<{ id: string }>();
-  //const [isLoading, setIsLoading] = useState<boolean>(true);
-        //const [responseError, setResponseError] = useState<string | null>(null);
 
-        const [cotizacion, setCotizacion] = useState({
-            id: "N/A",
-            fecha_emision: "N/A",
-            subtotal: 0,
-            impuesto: 0,
-            total: 0,
-            usuario:  { email: '', nombre: '' },
-        });
+  const [isTooStretched, setIsTooStretched] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
   useEffect(() => {
-              getQuotePreview(Number(quoteId))
-              .then((response) => {
-                  // Axios devuelve los datos en `response.data`
-                  setCotizacion(response.data);
-                  //setIsLoading(false);
-              })
-              .catch((error) => {
-                console.error("Error al obtener la cotización:", error);
-              
-                //setIsLoading(false);
-              });
-          }, [quoteId]);  
+    const handleResize = () => {
+        setIsTooStretched(window.innerWidth < 512);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Ejecuta una vez para inicializar valores
+    handleResize();
+
+    return () => {
+        window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const [usuario, setUsuario] = useState({
+    email: '',
+    nombre: '',
+  });
+  useEffect(() => {
+    getQuotePreview(Number(quoteId))
+    .then((response) => {
+      setUsuario(response.data.usuario);
+    })
+    .catch((error) => {
+      console.error("Error al obtener la cotización:", error);
+    });
+  }, [quoteId]); 
+
   return (
       <header ref={ref} style={styles.header}>
         <div style={styles.left}>
           <div style={styles.logoContainer}>
-            <Image
-              src={logo}
-              alt="ConstrUTEM Logo"
-              style={styles.logoImg}
-            />
+            <Link href={process.env.NEXT_PUBLIC_VENTAS_URL!}>
+              <Image
+                src={logo}
+                alt="ConstrUTEM Logo"
+                style={styles.logoImg}
+              />
+            </Link>
           </div>
         </div>
 
         <div style={styles.right}>
           <span style={styles.userInfo}>
-            <span style={styles.userIcon}>👤</span>
-            <span style={styles.userText}>
-              <span style={styles.userName}>{cotizacion.usuario.nombre}</span>
-              <span style={styles.userEmail}>{cotizacion.usuario.email}</span>
+            <span style={styles.userIcon} onClick={isTooStretched ? () => setIsOpen(!isOpen) : undefined}>
+              👤
             </span>
+
+            {!isTooStretched && (
+              <span style={styles.userText}>
+                <span style={styles.userName}>{usuario.nombre}</span>
+                <span style={styles.userEmail}>{usuario.email}</span>
+              </span>
+            )}
+
+            {isTooStretched && isOpen && (
+              <div style={styles.floatingBox}>
+                <span style={styles.userText}>
+                  <span style={styles.userName}>{usuario.nombre}</span>
+                  <span style={styles.userEmail}>{usuario.email}</span>
+                </span>
+              </div>
+            )}
+
           </span>
         </div>
       </header>
@@ -147,5 +173,20 @@ const styles: { [key: string]: React.CSSProperties } = {
   userEmail: {
     fontSize: '13px',
     color: '#a5b4fc',
+  },
+  floatingBox: {
+    position: 'absolute',
+    top: '99%',
+    right: 0,
+    backgroundColor: '#1f282f',
+    borderBottomLeftRadius: '16px',
+    padding: '12px',
+    zIndex: 999,
+    width: 'auto',
+    height: 'auto',
+  },
+  boxTitle: {
+    marginTop: 0,
+    fontSize: '16px',
   },
 };
