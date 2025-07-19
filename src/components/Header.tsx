@@ -8,8 +8,6 @@ import { useParams } from "next/navigation";
 import { getQuotePreview } from '../app/services/QuotePreviewService';
 import Link from 'next/link';
 
-
-
 export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
   function Header(props, ref) {
   const { id: quoteId } = useParams<{ id: string }>();
@@ -50,7 +48,7 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
       <header ref={ref} style={styles.header}>
         <div style={styles.left}>
           <div style={styles.logoContainer}>
-            <Link href={process.env.NEXT_PUBLIC_VENTAS_URL!}>
+            <Link href={process.env.NEXT_PUBLIC_VENTAS_URL || ''}>
               <Image
                 src={logo}
                 alt="ConstrUTEM Logo"
@@ -86,10 +84,8 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
         </div>
       </header>
     );
-    
   }
 );
-
 
 const styles: { [key: string]: React.CSSProperties } = {
   header: {
