@@ -51,7 +51,7 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
             <MercadoPagoTab
                 ref={pagoRef}
                 transaction_amount={transactionAmount}
-                cotizacion_id={quoteId}
+                previewQuoteId={previewQuoteId}
                 onUpdateStep={onUpdateStep}
             />
         </div>
