@@ -10,6 +10,7 @@ services:
       args:
         DEV_BACKEND_URL: ${DEV_BACKEND_URL}
         NEXT_PUBLIC_TOKEN_MERCADOPAGO: ${NEXT_PUBLIC_TOKEN_MERCADOPAGO}
+        NEXT_PUBLIC_VENTAS_URL: ${NEXT_PUBLIC_VENTAS_URL}
     
     # El puerto 3000 del host se mapea al puerto 3000 del contenedor,
     # permitiendo acceder a tu aplicación desde tu máquina local (ej. http://localhost:3000).
