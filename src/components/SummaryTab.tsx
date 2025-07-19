@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import formatNumberWithSpaces from "./utilities/FormatNumberWithDots";
-import Link from 'next/link';
 import { parseShortDate } from "./utilities/ParseDate";
 import { getFacturaPdf } from '@/app/services/FacturaPdf';
 import {
