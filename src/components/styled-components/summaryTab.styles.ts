@@ -51,19 +51,3 @@ export const FooterBoxStyled = styled.div`
         gap: 0px;
     }
 `;
-export const ButtonContainerStyled = styled.div`
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 16px;
-    overflow: hidden;
-
-    @media (min-width: 511px) {
-        justify-content: flex-end;
-        flex-direction: row;
-    }
-`;

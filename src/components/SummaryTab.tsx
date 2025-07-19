@@ -2,16 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import formatNumberWithSpaces from "./utilities/FormatNumberWithDots";
-import Link from 'next/link';
 import { parseShortDate } from "./utilities/ParseDate";
 import { getFacturaPdf } from '@/app/services/FacturaPdf';
 import {
   OrangeBoxStyled,
   OrangeBoxItemStyled,
-  FooterBoxStyled,
-  ButtonContainerStyled
+  FooterBoxStyled
 } from './styled-components/summaryTab.styles';
-import { getPaymentData } from '@/app/services/Summary-call';
 
 interface AmountDetails {
   fecha_emision: string,
@@ -20,50 +17,21 @@ interface AmountDetails {
   total: number,
 }
 
-interface CotizacionData {
-  numero_factura: number;
-  nombre_cliente: string;
-  empresa: string;
-  rut_cliente: string;
-}
-
-export default function SummaryTab({status, previewQuoteId, isPagado, amountDetails}: {
-  status: string | undefined,
-  previewQuoteId: string | undefined,
-  isPagado: boolean | undefined,
-  amountDetails: AmountDetails | undefined
-}) {
+export default function SummaryTab({quoteId, amountDetails}: {quoteId: number | undefined, amountDetails: AmountDetails | undefined}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [facturaPdf, setFacturaPdf] = useState<string | null>(null);
-  const [cotizacionData, setCotizacionData] = useState<CotizacionData | null>(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Obtener datos de cotización del backend
   useEffect(() => {
-    if (previewQuoteId !== undefined && (status === 'approved' || isPagado)) {
-      getPaymentData(Number(previewQuoteId))
-        .then((response) => {
-          setCotizacionData(response.data);
-        })
-        .catch((error) => {
-          console.error("Error al obtener los datos de la cotización:", error);
-        });
-      }
-  }, [previewQuoteId, status, isPagado]);
-
-  // Obtener PDF solo cuando se abre el modal
-  useEffect(() => {
-    if (previewQuoteId !== undefined && (status === 'approved' || isPagado)) {
-      if (facturaPdf === null) {
-        getFacturaPdf(Number(previewQuoteId))
+    if (isModalOpen && quoteId !== undefined && pdfUrl == null) {
+      getFacturaPdf(Number(quoteId))
         .then((response) => {
           const pdfBytes = new Uint8Array(response.data);
           const blob = new Blob([pdfBytes], { type: 'application/pdf' });
           const url = URL.createObjectURL(blob);
-          setFacturaPdf(url);
+          setPdfUrl(url);
 
           // Limpieza
           return () => URL.revokeObjectURL(url);
@@ -71,30 +39,18 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
         .catch((error) => {
           console.error("Error al obtener la factura:", error);
         });
-      } else { setPdfUrl(facturaPdf) }
     }
-  }, [isModalOpen, facturaPdf, previewQuoteId, isPagado, status]);
+    }, [isModalOpen, pdfUrl, quoteId]);
 
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Resumen de Compra</h1>
 
       <OrangeBoxStyled>
-        <OrangeBoxItemStyled>
-          N° Factura: {cotizacionData ? cotizacionData.numero_factura : "Cargando..."}
-        </OrangeBoxItemStyled>
-        <OrangeBoxItemStyled>
-          Fecha de Emision: {amountDetails ? parseShortDate(amountDetails.fecha_emision) : "Error al cargar"}
-        </OrangeBoxItemStyled>
-        <OrangeBoxItemStyled>
-          Cliente: {cotizacionData ? cotizacionData.nombre_cliente : "Cargando..."}
-        </OrangeBoxItemStyled>
-        <OrangeBoxItemStyled>
-          Rut cliente: {cotizacionData ? cotizacionData.rut_cliente : "Cargando..."}
-        </OrangeBoxItemStyled>
-        <OrangeBoxItemStyled>
-          Empresa: {cotizacionData ? cotizacionData.empresa : "Cargando..."}
-        </OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>N° Factura: 2899</OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>Fecha de Emision: { amountDetails != undefined ? parseShortDate(amountDetails.fecha_emision) : "Error al cargar"}</OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>Cliente: Cliente Ejemplo</OrangeBoxItemStyled>
+        <OrangeBoxItemStyled>Rut cliente: 12.345.678-9</OrangeBoxItemStyled>
       </OrangeBoxStyled>
 
       <div style={styles.details}>
@@ -113,22 +69,20 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
 
       <FooterBoxStyled>
         <div style={styles.footerItem}>S.I.I. - Santiago</div>
-        <div style={styles.footerItem}>{cotizacionData ? cotizacionData.numero_factura : ""}</div>
+        <div style={styles.footerItem}>2899</div>
       </FooterBoxStyled>
-      <ButtonContainerStyled>
+
+      <div style={styles.buttonContainer}>
         <button style={styles.button} onClick={openModal}>
           Ver Factura
         </button>
-        <Link href={process.env.NEXT_PUBLIC_VENTAS_URL!} style={styles.button}>
-          Siguiente
-        </Link>
-      </ButtonContainerStyled>
+      </div>
 
       {isModalOpen && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <button style={{ ...styles.closeButton, border: 'none', padding: '0px', fontSize: '32px' }} onClick={closeModal}>
+              <button style={styles.closeButton} onClick={closeModal}>
                 ×
               </button>
             </div>
@@ -140,7 +94,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
               />
             }
             <div style={styles.modalFooter}>
-              <ButtonContainerStyled>
+              <div style={styles.buttonContainer}>
                 <a
                   href={pdfUrl || ""}
                   download="Factura.pdf"
@@ -153,12 +107,12 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
                 >
                   { pdfUrl != null ? "Descargar PDF" : "Cargando PDF..." }
                 </a>
-              </ButtonContainerStyled>
-              <ButtonContainerStyled>
-                <button style={styles.closeButton} onClick={closeModal}>
+              </div>
+              <div style={styles.buttonContainer}>
+                <button style={{ ...styles.button, backgroundColor: "#5C5C5C" }} onClick={closeModal}>
                   Salir
                 </button>
-              </ButtonContainerStyled>
+              </div>
             </div>
           </div>
         </div>
@@ -207,14 +161,22 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '12px 24px',
     border: 'none',
     borderRadius: '8px',
-    backgroundColor: '#2563B6',
+    backgroundColor: '#FF7300',
     color: 'white',
     fontSize: '16px',
     fontWeight: 'bold',
     textAlign: 'center',
     textDecoration: 'none',
     cursor: 'pointer',
-    alignContent: 'center',
+  },
+  buttonContainer: {
+    bottom: '0',
+    left: '0',
+    right: '0',
+    display: 'flex',
+    justifyContent: 'right',
+    gap: '16px',
+    marginTop: '16px',
   },
   modalOverlay: {
     position: 'fixed',
@@ -229,7 +191,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#0B1631',
+    backgroundColor: '#fff',
     padding: '20px',
     margin: '6px',
     maxWidth: '800px',
@@ -239,13 +201,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     position: 'relative',
     borderRadius: '16px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(255,115,0,0.12)',
   },
   iframe: {
     flexGrow: 1,
-    border: '4px solid white',
-    borderRadius: '8px',
+    border: 'none',
     width: '100%',
-    boxSizing: 'border-box',
   },
   modalHeader: {
     display: 'flex',
@@ -254,16 +215,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '10px',
   },
   closeButton: {
-    padding: '12px 24px',
-    border: '1px solid white',
-    backgroundColor: '#0B1631',
-    borderRadius: '8px',
-    color: 'white',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    textDecoration: 'none',
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5em',
     cursor: 'pointer',
+    color: '#333',
   },
   modalFooter: {
     display: 'flex',

@@ -22,17 +22,13 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
 
     const [transactionAmount, setTransactionAmount] = useState<number | undefined>(undefined);
     const [amountDetails, setAmountDetails] = useState<AmountDetails | undefined>(undefined);
-    const [previewQuoteId, setPreviewQuoteId] = useState<string | undefined>(undefined);
     const [status, setStatus] = useState<string | undefined>(undefined);
-    const [isPagado, setIsPagado] = useState<boolean | undefined>(false);
     const [message, setMessage] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         setTransactionAmount(quoteRef.current?.getAmount());
-        setPreviewQuoteId(quoteRef.current?.getPreviewQuoteId());
         setAmountDetails(quoteRef.current?.getAmountDetails());
         setStatus(pagoRef.current?.getStatus());
-        setIsPagado(quoteRef.current?.getIsPagado());
         setMessage(pagoRef.current?.getMessage());
     }, [currentStep]);
 
@@ -51,7 +47,7 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
             <MercadoPagoTab
                 ref={pagoRef}
                 transaction_amount={transactionAmount}
-                previewQuoteId={previewQuoteId}
+                cotizacion_id={quoteId}
                 onUpdateStep={onUpdateStep}
             />
         </div>
@@ -65,9 +61,7 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
         </div>
         <div style={isVisible(4)}>
             <SummaryTab
-                status={status}
-                previewQuoteId={previewQuoteId}
-                isPagado={isPagado}
+                quoteId={quoteId}
                 amountDetails={amountDetails}
             />
         </div>

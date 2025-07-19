@@ -23,7 +23,7 @@ export interface MercadoPagoHandle {
 interface MercadoPagoProps extends React.HTMLProps<HTMLDivElement> {
   onUpdateStep: (step: number) => void;
   transaction_amount: number | undefined;
-  previewQuoteId: number | string | undefined;
+  cotizacion_id: number | string | undefined;
 }
 
 declare global {
@@ -46,11 +46,10 @@ declare global {
 
 export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
     function MercadoPagoTab(props, ref) {
-        const { onUpdateStep, transaction_amount, previewQuoteId } = props;
+        const { onUpdateStep, transaction_amount, cotizacion_id } = props;
         
         const [formKey, setFormKey] = useState<number>(0);
         const [status, setStatus] = useState<string>("");
-        const [isMounted, setIsMounted] = useState<boolean>(false);
         const [statusMessage, setStatusMessage] = useState<string>("");
 
         useImperativeHandle(ref, () => ({
@@ -79,40 +78,6 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 window.removeEventListener('resize', handleResize);
             };
         }, []);
-
-        // Saca datos del issuer
-        useEffect(() => {
-            const selectElement = document.getElementById('form-checkout__issuer');
-
-            if (!(selectElement instanceof HTMLSelectElement)) return;
-
-            const updateIssuer = () => {
-                const selectedOption = selectElement.options[selectElement.selectedIndex];
-                if (selectedOption) {
-                    setIssuer(selectedOption.text);
-                }
-            };
-
-            // Llama una vez al montar
-            updateIssuer();
-
-            // Observa cambios en las opciones del select (Cuando se agrega la tarjeta)
-            const observer = new MutationObserver((mutations) => {
-                for (const mutation of mutations) {
-                    if (mutation.type === 'childList') {
-                        updateIssuer();
-                        break;
-                    }
-                }
-            });
-
-            observer.observe(selectElement, { childList: true });
-
-            // Limpieza
-            return () => {
-                observer.disconnect();
-            };
-        }, [isMounted]);
     
         const [showOverlay, setShowOverlay] = useState(false);
         const [isLoading, setIsLoading] = useState(false);
@@ -211,13 +176,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                     },
                     callbacks: {
                         onFormMounted: (error: Error | null) => {
-                            if (error) {
-                                setIsMounted(false);
-                                return console.warn('Error en el formulario:', error);
-                            } else {
-                                setIsMounted(true);
-                                console.log("se esta pagando:", integerAmount, " pesos");
-                            }
+                            if (error) return console.warn('Error en el formulario:', error);
                         },
                         onSubmit: async (e: FormEvent<HTMLFormElement>) => {
                             e.preventDefault();
@@ -236,7 +195,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 paymentMethodId: paymentMethodId,
                                 token: token,
                                 cardholderEmail: cardholderEmail,
-                                cotizacionId: Number(previewQuoteId),
+                                cotizacionId: Number(cotizacion_id),
                             }
 
                             showLoadingOverlay(true);
@@ -265,7 +224,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 });
             };
             document.body.appendChild(script);
-        }, [transaction_amount, formKey, onUpdateStep, previewQuoteId]);
+        }, [transaction_amount, formKey, onUpdateStep, cotizacion_id]);
 
         // Estado para mostrar error si se ingresan letras en el número de tarjeta
         const [cardNumberError, setCardNumberError] = useState<string>("");
@@ -277,8 +236,6 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         // Estado para el tipo de tarjeta y su icono
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const [cardType, setCardType] = useState<any>(null);
-        // Estado para el banco emisor
-        const [issuer, setIssuer] = useState<string>('');
        
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
         function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -401,10 +358,10 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                     )}
                                 </div>
                                 {cardNumberError && (
-                                    <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{cardNumberError}</p>
+                                    <p style={{  fontSize: "12px", marginTop: "4px" }}>{cardNumberError}</p>
                                 )}
                                 {fieldValidity["form-checkout__cardNumber"] === false && (
-                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                <p style={{  fontSize: "12px", marginTop: "4px" }}>
                                     El número de tarjeta debe tener 16 dígitos separados por espacios.
                                 </p>
                                 )}
@@ -514,12 +471,20 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 fontSize: "24px",
                                 marginBottom: "10px"
                                 }}
-                            > Datos del emisor:
+                            > Datos bancarios:
                             </h2>
                             <label style={styles.description}>
-                                <strong>Emisor de la tarjeta: </strong>
-                                <select id="form-checkout__issuer" style={{ display: 'none' }}></select>
-                                <span>{issuer}</span>
+                                Banco emisor
+                                <select
+                                    id="form-checkout__issuer"
+                                    style={getInputStyle("form-checkout__issuer")}
+                                    
+                                ></select>
+                                {fieldValidity["form-checkout__issuer"] === false && (
+                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                                    Seleccione un banco emisor válido.
+                                </p>
+                                )}
                             </label>
                             <select id="form-checkout__installments" style={{ display: 'none' }}></select>
                         </FormInputStyled>

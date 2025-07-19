@@ -15,9 +15,7 @@ interface AmountDetails {
 
 export interface QuotePreviewHandle {
   saveQuote: () => void;
-  getPreviewQuoteId: () => string;
   getAmountDetails: () => AmountDetails;
-  getIsPagado: () => boolean;
   getAmount: () => number;
 }
 
@@ -29,7 +27,6 @@ interface QuotePreviewTabProps extends React.HTMLProps<HTMLDivElement> {
 export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
     function QuotePreviewTab(props, ref) {
         const { onUpdateStep, quoteId } = props;
-        const [isPagado, setIsPagado] = useState<boolean>(false);
 
         const translateError = (error: string | number): string => {
           if (Number(error) === 404) {
@@ -47,8 +44,6 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
             subtotal: 0,
             impuesto: 0,
             total: 0,
-            cotizacion_id: 0,
-            pagado: "N/A",
         });
         useEffect(() => {
             getQuotePreview(Number(quoteId))
@@ -56,27 +51,18 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
                 // Axios devuelve los datos en `response.data`
                 setCotizacion(response.data);
                 setIsLoading(false);
-                const pagoStatus = response.data.pagado;
-                if (pagoStatus === 'nuevo' || pagoStatus === 'pending') {
-                  setIsPagado(false);
-                } else if (pagoStatus === 'approved' || pagoStatus === 'rejected') {
-                  setIsPagado(true);
-                  onUpdateStep(4);
-                }
             })
             .catch((error) => {
+              console.error("Error al obtener la cotización:", error);
               setResponseError(translateError(error.response.status));
               setIsLoading(false);
             });
-        }, [quoteId, onUpdateStep]);
+        }, [quoteId]);
 
         useImperativeHandle(ref, () => ({
             saveQuote: async () => {
                 // const result = await QuotePreviewService.create({ /*…*/ });
                 // otras cosas utiles en caso de ser necesario
-            },
-            getPreviewQuoteId: () => {
-              return cotizacion.id;
             },
             getAmountDetails: () => {
               const amountDetails = {
@@ -86,9 +72,6 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
                 total: cotizacion.total
               };
               return amountDetails;
-            },
-            getIsPagado: () => {
-              return isPagado;
             },
             getAmount: () => {
               return cotizacion.total;
@@ -130,7 +113,7 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
                     <p style={styles.detailText}>
                         <strong>ID de Cotización: </strong>
                         <span style={styles.placeholderStyle}>
-                          {cotizacion.cotizacion_id}
+                          {cotizacion.id}
                         </span>
                     </p>
                     <p style={styles.detailText}>
