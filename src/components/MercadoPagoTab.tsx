@@ -5,6 +5,7 @@ import { useEffect, useState, forwardRef, useImperativeHandle, FormEvent  } from
 import { postPayment_MercadoPago } from "@/app/services/Payment_MercadoPago";
 import { useFormValidator } from "./utilities/FormValidator";
 import { mpvalidators, validateRutChileno } from "./utilities/Validators";
+import { parseRut } from "./utilities/ParseRut";
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
 import {
@@ -123,17 +124,19 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
             "form-checkout__securityCode",
             "form-checkout__cardholderName",
             "form-checkout__cardholderEmail",
-            "form-checkout__identificationNumber",
+            "form-auxiliar__identificationNumber",
         ];
         // Se le envia formKey para que se actualizen las referencias cada vez que
         // se desmonta y monta el formulario.
         //const { fieldValidity: validatorFieldValidity, isFormValid: validatorIsFormValid } = useFormValidator(fieldIds, mpvalidators, formKey);
     
+        // Estado para el tipo de documento, se usa para el RUT chileno
+        const [documentType, setDocumentType] = useState<string>("RUT");
         // Estado para la validez de los campos, para poder actualizar manualmente el RUT
         const [fieldValidity, setFieldValidity] = useState<{ [key: string]: boolean | null }>({});
         const [isFormValid, setIsFormValid] = useState(false);
         // Hook de validación, sincroniza con el estado local
-        const validatorResult = useFormValidator(fieldIds, mpvalidators, formKey);
+        const validatorResult = useFormValidator(fieldIds, mpvalidators, formKey, { idType: documentType });
         useEffect(() => {
             setFieldValidity(validatorResult.fieldValidity);
             setIsFormValid(validatorResult.isFormValid);
@@ -150,7 +153,8 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
     
         useEffect(() => {
             // evita que cargue el script cuando no hay monto inicializado
-            if (transaction_amount === undefined || transaction_amount === 0) return;
+            let integerAmount = '3'
+            if (transaction_amount === undefined || transaction_amount === 0) integerAmount = '2';
 
             // evita que cargue el script mas de una vez
             const existingScript = document.querySelector('script[src="https://sdk.mercadopago.com/js/v2"]');
@@ -158,7 +162,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 existingScript.remove();
             }
 
-            const [integerAmount] = transaction_amount.toString().split('.');
+            //const [integerAmount] = transaction_amount.toString().split('.');
 
             const script = document.createElement('script');
             script.src = 'https://sdk.mercadopago.com/js/v2';
@@ -270,8 +274,6 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         // Estado para mostrar error si se ingresan letras en el número de tarjeta
         const [cardNumberError, setCardNumberError] = useState<string>("");
         const [cvvError, setCvvError] = useState<string>("");
-        // Estado para el tipo de documento, se usa para el RUT chileno
-        const [documentType, setDocumentType] = useState<string>("RUT");
         // Estado para el mensaje de validación del RUT
         const [rutValidationMsg, setRutValidationMsg] = useState<string>("");
         // Estado para el tipo de tarjeta y su icono
@@ -279,6 +281,8 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         const [cardType, setCardType] = useState<any>(null);
         // Estado para el banco emisor
         const [issuer, setIssuer] = useState<string>('');
+        // Conserva los estados del RUT o el documento
+        const [idNumber, setIdNumber] = useState('');
        
         // Formatea el número de tarjeta con espacios automáticos cada 4 dígitos y muestra error si hay letras
         function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -309,28 +313,30 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
         function handleRutChange(e: React.ChangeEvent<HTMLInputElement>) {
             let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
             value = value.slice(0, 9); // Limita a 9 caracteres
-            e.target.value = value;
             // Valida el RUT visualmente si el tipo de documento es RUT
             if (documentType === "RUT" && value.length >= 8) {
+                // Visualmente se ve como un RUT
+                e.target.value = parseRut(value);
+                // Pero el valor que recibe MP es sin puntos ni guíon
+                setIdNumber(value);
                 if (validateRutChileno(value)) {
                     setRutValidationMsg("RUT válido");
                     setFieldValidity(prev => ({
                         ...prev,
-                        ["form-checkout__identificationNumber"]: true
+                        ["form-auxiliar__identificationNumber"]: true
                     }));
                 } else {
                     setRutValidationMsg("RUT inválido, verifique el digito verificador");
                     setFieldValidity(prev => ({
                         ...prev,
-                        ["form-checkout__identificationNumber"]: false
+                        ["form-auxiliar__identificationNumber"]: false
                     }));
                 }
             } else {
+                // Visualmente y el valor de MP son exactamente iguales.
+                e.target.value = value;
+                setIdNumber(value);
                 setRutValidationMsg("");
-                setFieldValidity(prev => ({
-                    ...prev,
-                    ["form-checkout__identificationNumber"]: null
-                }));
             }
         }
         // Solo letras y espacios para nombre del titular
@@ -471,7 +477,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                 </p>
                                 )}
                             </label>
-                            <label style={{ ...styles.description}}>
+                            <label style={styles.description}>
                                 Tipo de documento
                                 <select
                                     id="form-checkout__identificationType"
@@ -487,27 +493,28 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                             <label style={styles.description}>
                                 {documentType && documentType !== "RUT" ? "Número de documento" : "Número de documento (RUT SIN puntos NI guion)"}
                                 <input
-                                    id="form-checkout__identificationNumber"
-                                    style={getInputStyle("form-checkout__identificationNumber")}
+                                    id="form-auxiliar__identificationNumber"
+                                    style={getInputStyle("form-auxiliar__identificationNumber")}
                                     onChange={handleRutChange}
                                     placeholder="12.345.678-K"
                                 />
-                                {documentType === "RUT" && rutValidationMsg && (
+                                {(documentType === "RUT") && (rutValidationMsg !== "") && (
                                     <p style={{ color: rutValidationMsg === "RUT válido" ? "green" : "red", fontSize: "12px", marginTop: "4px" }}>
                                         {rutValidationMsg}
                                     </p>
                                 )}
-                                {fieldValidity["form-checkout__identificationNumber"] === false && documentType === "RUT" && (
-                                <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-                                    El RUT ingresado no es válido. Verifique el dígito verificador.
-                                </p>
-                                )}
-                                {fieldValidity["form-checkout__identificationNumber"] === false && documentType !== "RUT" && (
+                                {fieldValidity["form-auxiliar__identificationNumber"] === false && documentType !== "RUT" && (
                                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
                                     El número de documento no puede ser vacío ni menor a 9 caracteres.
                                 </p>
                                 )}
                             </label>
+                            <input
+                                id="form-checkout__identificationNumber"
+                                value={idNumber}
+                                readOnly
+                                style={{ display: 'none' }}
+                            />
                             <h2
                                 style={{
                                 ...styles.title,
@@ -630,7 +637,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     input: {
         padding: '10px',
-        marginBottom: '15px',
+        marginBottom: '6px',
         fontSize: '16px',
         border: '1px solid #999',
         borderRadius: '5px',
@@ -640,6 +647,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     inputError: {
         padding: '10px',
+        marginBottom: '6px',
         fontSize: '16px',
         border: '1px solid #E53935',
         color: '#E53935',
