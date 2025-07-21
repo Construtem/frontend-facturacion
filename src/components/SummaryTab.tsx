@@ -37,6 +37,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [facturaPdf, setFacturaPdf] = useState<string | null>(null);
   const [cotizacionData, setCotizacionData] = useState<CotizacionData | null>(null);
+  const ventasUrl = process.env.NEXT_PUBLIC_VENTAS_URL || "https://ventas.tssw.cl/";
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -119,7 +120,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
         <button style={styles.button} onClick={openModal}>
           Ver Factura
         </button>
-        <Link href={process.env.NEXT_PUBLIC_VENTAS_URL || ''} style={styles.button}>
+        <Link href={ventasUrl} style={styles.button}>
           Siguiente
         </Link>
       </ButtonContainerStyled>
