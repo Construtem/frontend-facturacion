@@ -59,6 +59,7 @@ jobs:
             --build-arg DEV_BACKEND_URL=${{ secrets.DEV_BACKEND_URL }} \
             --build-arg NEXT_PUBLIC_TOKEN_MERCADOPAGO=${{ secrets.NEXT_PUBLIC_TOKEN_MERCADOPAGO }} \
             --build-arg NEXT_PUBLIC_VENTAS_URL=${{ secrets.NEXT_PUBLIC_VENTAS_URL }} \
+            --build-arg NEXT_PUBLIC_FRONT_LOGIN=${{ secrets.NEXT_PUBLIC_FRONT_LOGIN }} \
             -t southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-facturacion:latest .
 
       - name: Subir imagen a Artifact Registry
