@@ -59,7 +59,7 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
         console.log("No se encontró información de usuario en localStorage, redirigiendo a login");
         window.location.href = `${frontLoginUrl}`;
       }
-    }, []);
+    }, [frontLoginUrl]);
 
     // Verifica el tamaño de la pantalla
     const [isTooStretched, setIsTooStretched] = useState(false);
