@@ -1,6 +1,6 @@
 // src/components/utilities/FormValidator.tsx
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 type FieldValidity = { [key: string]: boolean | null };
 // eslint-disable-next-line
