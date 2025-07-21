@@ -153,8 +153,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
     
         useEffect(() => {
             // evita que cargue el script cuando no hay monto inicializado
-            let integerAmount = '3'
-            if (transaction_amount === undefined || transaction_amount === 0) integerAmount = '2';
+            if (transaction_amount === undefined || transaction_amount === 0) return;
 
             // evita que cargue el script mas de una vez
             const existingScript = document.querySelector('script[src="https://sdk.mercadopago.com/js/v2"]');
@@ -162,7 +161,7 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                 existingScript.remove();
             }
 
-            //const [integerAmount] = transaction_amount.toString().split('.');
+            const [integerAmount] = transaction_amount.toString().split('.');
 
             const script = document.createElement('script');
             script.src = 'https://sdk.mercadopago.com/js/v2';
