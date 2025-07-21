@@ -23,7 +23,7 @@ export function validateRutChileno(rut: string): boolean {
 
 
 
-export const mpvalidators: Record<string, (value: string) => boolean> = {
+export const mpvalidators: Record<string, (value: string, context?: { idType?: string }) => boolean> = {
     // Visa/Mastercard: 4 bloques de 4 dígitos, Amex: 4-6-5 dígitos
     "form-checkout__cardNumber": (v) =>
         /^\d{4} \d{4} \d{4} \d{4}$/.test(v) || // 16 dígitos (4-4-4-4)
@@ -36,29 +36,16 @@ export const mpvalidators: Record<string, (value: string) => boolean> = {
     "form-checkout__cardholderName": (v) =>/^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/.test(v.trim()),
     // Formato correo@example.com
     "form-checkout__cardholderEmail": (v) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/.test(v),
-    // No vacio
-    "form-checkout__identificationNumber": (v) => {
+    // DV correcto
+    "form-auxiliar__identificationNumber": (v, context) => {
+        const idType = context?.idType;
         const clean = v.replace(/\./g, "").replace(/-/g, "");
 
-        const upper = v.toUpperCase();
-        if (upper.slice(0, -1).includes('K')) {
-            return false;
+        if (idType?.toLowerCase() === "otro") {
+          return /^[a-zA-Z0-9]{5,20}$/.test(clean);
+        } else if (idType?.toLowerCase() === "rut") {
+          return validateRutChileno(v);
         }
-
-        
-        //console.log('Validando identificationNumber:', v, 'Clean:', clean);
-        return /^\d{7,8}-[\dkK]$/.test(clean) || clean.trim().length === 9;
-    },
-    "form-checkout__Rut": (v) => {
-        const clean = v.replace(/\./g, "").replace(/-/g, "");
-        const upper = v.toUpperCase();
-        console.log(true);
-        if (upper.slice(0, -1).includes('K')) {
-            return false;
-        }    
-        return validateRutChileno(v);
-
-        
-        return /^\d{7,8}-[\dkK]$/.test(clean) || clean.trim().length === 9;
+        return false; 
     }
 };
