@@ -1,188 +1,224 @@
-// src/components/Header.tsx
-"use client";
-
-import { forwardRef, useEffect, useState } from 'react';
-import Image from "next/image";
+'use client';
+import React, { useEffect, useState, forwardRef } from "react";
+import Image from 'next/image';
 import logo from "@/assets/images/logo.png";
-import { useParams } from "next/navigation";
-import { getQuotePreview } from '../app/services/QuotePreviewService';
-import Link from 'next/link';
+import exit from '@/assets/images/exit.png';
+import { useRouter } from "next/navigation";
+import {
+  HeaderStyled,
+  RightContainerStyled,
+  UserInfoContainerStyled,
+  RoleBadgeStyled,
+  FloatingBoxStyled
+} from './styled-components/header.styles';
+
+interface UserData {
+  name: string;
+  email: string;
+  photoURL?: string;
+  rol: string;
+}
 
 export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
   function Header(props, ref) {
-  const { id: quoteId } = useParams<{ id: string }>();
+    const [user, setUser] = useState<UserData | null>(null);
+    const router = useRouter();
+    const frontLoginUrl = process.env.NEXT_PUBLIC_FRONT_LOGIN || "https://login.tssw.cl";
+    const ventasUrl = process.env.NEXT_PUBLIC_VENTAS_URL || "https://ventas.tssw.cl/";
 
-  const [isTooStretched, setIsTooStretched] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+    // Usar esto solo para pruebas separadas
+    { /*
+    useEffect(() => {
+      localStorage.removeItem("user");
+      if (!localStorage.getItem("user")) {
+        // Crear un usuario falso
+        const fakeUser: UserData = {
+          name: "Usuario Prueba",
+          email: "google@example.com",
+          photoURL: logo.src,
+          rol: "usuario",
+        };
+        // Lo guarda en localStorage
+        localStorage.setItem("user", JSON.stringify(fakeUser));
+      }
+    }, []);
+    */ }
 
-  useEffect(() => {
-    const handleResize = () => {
+    // Obtiene los datos locales del usuario
+    useEffect(() => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const parsedUser: UserData = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } catch (err) {
+          console.error("Error al parsear datos de usuario, limpiando localStorage:", err);
+          localStorage.removeItem("user");
+        }
+      } else {
+        console.log("No se encontró información de usuario en localStorage, redirigiendo a login");
+        window.location.href = `${frontLoginUrl}`;
+      }
+    }, []);
+
+    // Verifica el tamaño de la pantalla
+    const [isTooStretched, setIsTooStretched] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    useEffect(() => {
+      const handleResize = () => {
         setIsTooStretched(window.innerWidth < 512);
-    };
+      };
 
-    window.addEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize);
 
-    // Ejecuta una vez para inicializar valores
-    handleResize();
+      // Ejecuta una vez para inicializar valores
+      handleResize();
 
-    return () => {
+      return () => {
         window.removeEventListener('resize', handleResize);
+      };
+    }, []);
+
+    const handleLogout = async () => {
+      localStorage.removeItem("user");
+      console.log("Usuario ha cerrado sesión");
+      window.location.href = `${frontLoginUrl}`;
     };
-  }, []);
 
-  const [usuario, setUsuario] = useState({
-    email: '',
-    nombre: '',
-  });
-  useEffect(() => {
-    getQuotePreview(Number(quoteId))
-    .then((response) => {
-      setUsuario(response.data.usuario);
-    })
-    .catch((error) => {
-      console.error("Error al obtener la cotización:", error);
-    });
-  }, [quoteId]); 
-
-  return (
-      <header ref={ref} style={styles.header}>
-        <div style={styles.left}>
-          <div style={styles.logoContainer}>
-            <Link href={process.env.NEXT_PUBLIC_VENTAS_URL || ''}>
-              <Image
-                src={logo}
-                alt="ConstrUTEM Logo"
-                style={styles.logoImg}
-              />
-            </Link>
-          </div>
+    return (
+      <HeaderStyled ref={ref}>
+        <div style={styles.logoContainer}>
+          <Image
+            src={logo}
+            alt="ConstrUTEM Logo"
+            style={styles.logoImage}
+            onClick={() => router.push(ventasUrl)}
+          />
         </div>
 
-        <div style={styles.right}>
-          <span style={styles.userInfo}>
-            <span style={styles.userIcon} onClick={isTooStretched ? () => setIsOpen(!isOpen) : undefined}>
-              👤
-            </span>
+        <RightContainerStyled>
+          {user && (
+            <UserInfoContainerStyled>
+              {!isTooStretched &&
+                <RoleBadgeStyled>
+                  {user.rol}
+                </RoleBadgeStyled>
+              }
 
-            {!isTooStretched && (
-              <span style={styles.userText}>
-                <span style={styles.userName}>{usuario.nombre}</span>
-                <span style={styles.userEmail}>{usuario.email}</span>
+              {isTooStretched && (isOpen ?
+                <span style={{ fontSize: '24px' }}>˄</span>
+              :
+                <span style={{ fontSize: '24px' }}>˅</span>
+              )}
+              <span style={styles.photoWrapper} onClick={isTooStretched ? () => setIsOpen(!isOpen) : undefined}>
+                {user.photoURL ? (
+                  <Image
+                    src={user.photoURL}
+                    alt="Foto perfil"
+                    width={32}
+                    height={32}
+                    style={styles.userImage}
+                  />
+                ) : (
+                  "👤"
+                )}
               </span>
-            )}
 
-            {isTooStretched && isOpen && (
-              <div style={styles.floatingBox}>
-                <span style={styles.userText}>
-                  <span style={styles.userName}>{usuario.nombre}</span>
-                  <span style={styles.userEmail}>{usuario.email}</span>
-                </span>
-              </div>
-            )}
+              {(!isTooStretched || isOpen) && (
+                <FloatingBoxStyled>
+                  {isTooStretched &&
+                    <RoleBadgeStyled>
+                      {user.rol}
+                    </RoleBadgeStyled>
+                  }
+                  <div style={styles.nameBlock}>
+                    <div style={styles.name}>
+                      {user.name}
+                    </div>
+                    <div style={styles.email}>
+                      {user.email}
+                    </div>
+                  </div>
+                </FloatingBoxStyled>
+              )}
+            </UserInfoContainerStyled>
+          )}
 
-          </span>
-        </div>
-      </header>
+          <Image
+            src={exit}
+            alt="Cerrar sesión"
+            width={28}
+            height={28}
+            style={styles.logoutIcon}
+            onClick={handleLogout}
+          />
+        </RightContainerStyled>
+      </HeaderStyled>
     );
   }
 );
 
 const styles: { [key: string]: React.CSSProperties } = {
-  header: {
-    width: '100%',
-    height: '58px',
-    background: '#1f282f',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 32px',
-    boxSizing: 'border-box',
-    position: 'fixed',
-    top: '0',
-    left: '0',
-    zIndex: '100',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-  },
-  left: {
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
-  },
   logoContainer: {
-    padding: '3px 0',
-    height: '100%',
-    boxSizing: 'border-box',
-    width: 'auto',
+    display: "flex",
+    alignItems: "center",
+    height: "100%"
   },
-  logoImg: {
-    height: '100%',
-    width: 'auto',
-    objectFit: 'contain',
+  logoImage: {
+    maxHeight: "58px",
+    width: "auto",
+    cursor: "pointer"
   },
-  right: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '24px',
+  photoWrapper: {
+    backgroundColor: "#ffffff",
+    color: "#2d2d2d",
+    borderRadius: "9999px",
+    padding: "6px",
+    fontSize: "1.125rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
   },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '4px 16px',
+  userImage: {
+    borderRadius: "9999px",
+    objectFit: "cover",
+    minWidth: "32px",
+    minHeight: "32px",
+    maxWidth: "32px",
+    maxHeight: "32px",
+    userSelect: "none"
   },
-  userRole: {
-    backgroundColor: '#ff8000',
-    borderRadius: '20px',
-    padding: '8px 15px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)',
-    color: '#222222',
-    fontWeight: 'medium',
-    fontFamily: 'Roboto, sans-serif',
-    fontSize: '15px',
-    whiteSpace: 'nowrap',
-    userSelect: 'none',
+  nameBlock: {
+    display: "flex",
+    flexDirection: "column",
+    lineHeight: 1.2,
+    textAlign: "right"
   },
-  userIcon: {
-    background: 'white',
-    color: '#1f2937',
-    borderRadius: '50%',
-    padding: '4px',
-    fontSize: '18px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    userSelect: 'none',
+  logoutIcon: {
+    cursor: "pointer",
+    userSelect: "none"
   },
-  userText: {
-    display: 'flex',
-    flexDirection: 'column',
-    lineHeight: '19px',
+  name: {
+    color: "white",
+    fontSize: "0.875rem",
+    fontFamily: "Montserrat, sans-serif",
   },
-  userName: {
-    fontSize: '16px',
-    color: 'white',
-  },
-  userEmail: {
-    fontSize: '13px',
-    color: '#a5b4fc',
+  email: {
+    fontFamily: "Montserrat, sans-serif",
+    fontSize: "0.75rem",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   floatingBox: {
     position: 'absolute',
     top: '99%',
     right: 0,
-    backgroundColor: '#1f282f',
+    backgroundColor: '#2d2d2d',
     borderBottomLeftRadius: '16px',
     padding: '12px',
     zIndex: 999,
     width: 'auto',
     height: 'auto',
-  },
-  boxTitle: {
-    marginTop: 0,
-    fontSize: '16px',
   },
 };
