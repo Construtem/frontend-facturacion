@@ -9,7 +9,8 @@ import {
   RightContainerStyled,
   UserInfoContainerStyled,
   RoleBadgeStyled,
-  FloatingBoxStyled
+  FloatingBoxStyled,
+  ButtonContainerStyled
 } from './styled-components/header.styles';
 
 interface UserData {
@@ -19,12 +20,17 @@ interface UserData {
   rol: string;
 }
 
+
 export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
   function Header(props, ref) {
     const [user, setUser] = useState<UserData | null>(null);
     const router = useRouter();
-    const frontLoginUrl = process.env.NEXT_PUBLIC_FRONT_LOGIN || "https://login.tssw.cl";
+    const frontLoginUrl = process.env.NEXT_PUBLIC_FRONT_LOGIN || "https://login.tssw.cl/";
     const ventasUrl = process.env.NEXT_PUBLIC_VENTAS_URL || "https://ventas.tssw.cl/";
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
 
     // Usar esto solo para pruebas separadas
     { /*
@@ -147,9 +153,35 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
             width={28}
             height={28}
             style={styles.logoutIcon}
-            onClick={handleLogout}
+            onClick={openModal}
           />
         </RightContainerStyled>
+
+        {isModalOpen && (
+          <div style={styles.modalOverlay}>
+            <div style={styles.modalContent}>
+              <div style={styles.modalHeader}>
+                <button style={{ ...styles.closeButton, border: 'none', padding: '0px', fontSize: '32px' }} onClick={closeModal}>
+                  ×
+                </button>
+              </div>
+              <h2>Confirmar cierre de sesión</h2>
+              <p>Esta acción cerrará tu sesión actual. ¿Quieres continuar?</p>
+              <div style={styles.modalFooter}>
+                <ButtonContainerStyled>
+                  <button style={styles.closeButton} onClick={closeModal}>
+                    Cancelar
+                  </button>
+                </ButtonContainerStyled>
+                <ButtonContainerStyled>
+                  <button style={styles.button} onClick={handleLogout}>
+                    Cerrar sesión
+                  </button>
+                </ButtonContainerStyled>
+              </div>
+            </div>
+          </div>
+        )}
       </HeaderStyled>
     );
   }
@@ -217,5 +249,66 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 999,
     width: 'auto',
     height: 'auto',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 1000,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#0B1631',
+    padding: '20px',
+    margin: '6px',
+    maxWidth: '800px',
+    width: 'auto',
+    height: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    borderRadius: '16px',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'right',
+    alignItems: 'center',
+    marginBottom: '10px',
+  },
+  closeButton: {
+    padding: '12px 24px',
+    border: '1px solid white',
+    backgroundColor: '#0B1631',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    textDecoration: 'none',
+    cursor: 'pointer',
+  },
+  button: {
+    padding: '12px 24px',
+    border: 'none',
+    borderRadius: '8px',
+    backgroundColor: '#2563B6',
+    color: 'white',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    alignContent: 'center',
+  },
+  modalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px',
+    marginTop: '10px',
   },
 };

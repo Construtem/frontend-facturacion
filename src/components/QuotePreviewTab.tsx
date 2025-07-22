@@ -146,10 +146,11 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
                         </span>
                     </p>
                     <p style={styles.detailText}>
-                        <strong>Subtotal: </strong>
+                        <strong>Subtotal (desc. aplicado): </strong>
                         <span style={styles.placeholderStyle}>
                           ${formatNumberWithSpaces(cotizacion.subtotal)}
                         </span>
+                        <span style={{ fontStyle: 'italic', fontSize: '14px' }}> *Incluye envío</span>
                     </p>
                     <p style={styles.detailText}>
                         <strong>Impuesto: </strong>
