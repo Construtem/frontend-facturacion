@@ -6,6 +6,7 @@ import { postPayment_MercadoPago } from "@/app/services/Payment_MercadoPago";
 import { useFormValidator } from "./utilities/FormValidator";
 import { mpvalidators, validateRutChileno } from "./utilities/Validators";
 import { parseRut } from "./utilities/ParseRut";
+import { enviarDespacho } from '@/app/services/EnviarDespacho';
 import Image from "next/image";
 import mplogo from "@/assets/images/logo-mercado-pago.png";
 import {
@@ -253,6 +254,14 @@ export default forwardRef<MercadoPagoHandle, MercadoPagoProps>(
                                     const error = response.data.detalle_status;
                                     setStatusMessage(error);
                                     setFormKey(formkey => formkey + 1); // obliga al form a remontarse
+                                } else {
+                                    enviarDespacho(Number(previewQuoteId), {})
+                                    .then((response) => {
+                                        console.log("Despacho enviado exitosamente:", response.data);
+                                    })
+                                    .catch((error) => {
+                                        console.error("Error al enviar despacho:", error);
+                                    });
                                 }
                             })
                             .catch((error) => {
