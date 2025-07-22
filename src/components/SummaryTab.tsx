@@ -30,7 +30,7 @@ interface CotizacionData {
 export default function SummaryTab({status, previewQuoteId, isPagado, amountDetails}: {
   status: string | undefined,
   previewQuoteId: string | undefined,
-  isPagado: boolean | undefined,
+  isPagado: string | undefined,
   amountDetails: AmountDetails | undefined
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
 
   // Obtener datos de cotización del backend
   useEffect(() => {
-    if (previewQuoteId !== undefined && (status === 'approved' || isPagado)) {
+    if (previewQuoteId !== undefined && (status === 'approved' || isPagado === 'approved')) {
       getPaymentData(Number(previewQuoteId))
         .then((response) => {
           setCotizacionData(response.data);
@@ -57,7 +57,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
 
   // Obtener PDF solo cuando se abre el modal
   useEffect(() => {
-    if (previewQuoteId !== undefined && (status === 'approved' || isPagado)) {
+    if (previewQuoteId !== undefined && (status === 'approved' || isPagado === 'approved')) {
       if (facturaPdf === null) {
         getFacturaPdf(Number(previewQuoteId))
         .then((response) => {

@@ -17,7 +17,7 @@ export interface QuotePreviewHandle {
   saveQuote: () => void;
   getPreviewQuoteId: () => string;
   getAmountDetails: () => AmountDetails;
-  getIsPagado: () => boolean;
+  getIsPagado: () => string;
   getAmount: () => number;
 }
 
@@ -29,7 +29,7 @@ interface QuotePreviewTabProps extends React.HTMLProps<HTMLDivElement> {
 export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
     function QuotePreviewTab(props, ref) {
         const { onUpdateStep, quoteId } = props;
-        const [isPagado, setIsPagado] = useState<boolean>(false);
+        const [isPagado, setIsPagado] = useState<string>('nuevo');
 
         const translateError = (error: string | number): string => {
           if (Number(error) === 404) {
@@ -58,9 +58,15 @@ export default forwardRef<QuotePreviewHandle, QuotePreviewTabProps>(
                 setIsLoading(false);
                 const pagoStatus = response.data.pagado;
                 if (pagoStatus === 'nuevo' || pagoStatus === 'pending') {
-                  setIsPagado(false);
-                } else if (pagoStatus === 'approved' || pagoStatus === 'rejected') {
-                  setIsPagado(true);
+                  setIsPagado('nuevo');
+                } else if (pagoStatus === 'en proceso') {
+                  setIsPagado('en proceso');
+                  onUpdateStep(3);
+                } else if (pagoStatus === 'rejected' ) {
+                  setIsPagado('tryagain');
+                  onUpdateStep(3);
+                } else if (pagoStatus === 'approved') {
+                  setIsPagado('approved');
                   onUpdateStep(4);
                 }
             })
