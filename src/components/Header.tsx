@@ -55,11 +55,8 @@ export default forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
           console.error("Error al parsear datos de usuario, limpiando localStorage:", err);
           localStorage.removeItem("user");
         }
-      } else {
-        console.log("No se encontró información de usuario en localStorage, redirigiendo a login");
-        window.location.href = `${frontLoginUrl}`;
       }
-    }, [frontLoginUrl]);
+    },[]);
 
     // Verifica el tamaño de la pantalla
     const [isTooStretched, setIsTooStretched] = useState(false);
