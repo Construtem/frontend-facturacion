@@ -100,7 +100,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
 
       <div style={styles.details}>
         <p style={styles.detailText}>
-          <strong>Subtotal:</strong> ${ amountDetails != undefined ? formatNumberWithSpaces(amountDetails.subtotal) : "Error al cargar el subtotal"}
+          <strong>Subtotal (desc. aplicado):</strong> ${ amountDetails != undefined ? formatNumberWithSpaces(amountDetails.subtotal) : "Error al cargar el subtotal"}
         </p>
         <p style={styles.detailText}>
           <strong>Impuesto:</strong> ${ amountDetails != undefined ? formatNumberWithSpaces(amountDetails.impuesto) : "Error al cargar el impuesto"}

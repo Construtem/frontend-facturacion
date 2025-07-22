@@ -39,7 +39,7 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
                 setMessage(pagoRef.current?.getMessage());
                 break;
             case 'en proceso':
-                setStatus('en proceso');;
+                setStatus('in_process');
                 break;
             case 'tryagain':
                 setStatus('tryagain');

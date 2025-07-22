@@ -65,7 +65,7 @@ export default function StatusTab({status, message, onUpdateStep}: {status: stri
                     </p>
                 </div>
             }
-            { currentStatus === 'en proceso' &&
+            { currentStatus === 'in_process' &&
                 <div>
                     <p style={{
                         ...styles.title,
@@ -74,7 +74,7 @@ export default function StatusTab({status, message, onUpdateStep}: {status: stri
                     <Image
                         src={procesoimg}
                         alt="rechazado"
-                        style={styles.statusImg}
+                        style={{ ...styles.statusImg, animation: 'spin 5s linear infinite' }}
                         draggable={false}
                     />
                     <p style={{
@@ -154,6 +154,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         justifyContent: "space-between",
         padding: '40px 0px',
         overflowY: 'auto',
+        overflowX: 'hidden',
         minHeight: '500px',
         width: '100%',
     },
