@@ -24,16 +24,31 @@ export default function TabContainer({quoteId, currentStep, onUpdateStep}: {quot
     const [amountDetails, setAmountDetails] = useState<AmountDetails | undefined>(undefined);
     const [previewQuoteId, setPreviewQuoteId] = useState<string | undefined>(undefined);
     const [status, setStatus] = useState<string | undefined>(undefined);
-    const [isPagado, setIsPagado] = useState<boolean | undefined>(false);
+    const [isPagado, setIsPagado] = useState<string | undefined>(undefined);
     const [message, setMessage] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         setTransactionAmount(quoteRef.current?.getAmount());
         setPreviewQuoteId(quoteRef.current?.getPreviewQuoteId());
         setAmountDetails(quoteRef.current?.getAmountDetails());
-        setStatus(pagoRef.current?.getStatus());
         setIsPagado(quoteRef.current?.getIsPagado());
-        setMessage(pagoRef.current?.getMessage());
+        const newIsPagado = quoteRef.current?.getIsPagado();
+        switch (newIsPagado) {
+            case 'nuevo':
+                setStatus(pagoRef.current?.getStatus());
+                setMessage(pagoRef.current?.getMessage());
+                break;
+            case 'en proceso':
+                setStatus('in_process');
+                break;
+            case 'tryagain':
+                setStatus('tryagain');
+                setMessage('try_other_quote');
+                break;
+            case 'approved':
+                setStatus('approved');
+                break;
+        }   
     }, [currentStep]);
 
     return (

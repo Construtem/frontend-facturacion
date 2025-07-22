@@ -30,7 +30,7 @@ interface CotizacionData {
 export default function SummaryTab({status, previewQuoteId, isPagado, amountDetails}: {
   status: string | undefined,
   previewQuoteId: string | undefined,
-  isPagado: boolean | undefined,
+  isPagado: string | undefined,
   amountDetails: AmountDetails | undefined
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
 
   // Obtener datos de cotización del backend
   useEffect(() => {
-    if (previewQuoteId !== undefined && (status === 'approved' || isPagado)) {
+    if (previewQuoteId !== undefined && (status === 'approved' || isPagado === 'approved')) {
       getPaymentData(Number(previewQuoteId))
         .then((response) => {
           setCotizacionData(response.data);
@@ -57,7 +57,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
 
   // Obtener PDF solo cuando se abre el modal
   useEffect(() => {
-    if (previewQuoteId !== undefined && (status === 'approved' || isPagado)) {
+    if (previewQuoteId !== undefined && (status === 'approved' || isPagado === 'approved')) {
       if (facturaPdf === null) {
         getFacturaPdf(Number(previewQuoteId))
         .then((response) => {
@@ -100,7 +100,7 @@ export default function SummaryTab({status, previewQuoteId, isPagado, amountDeta
 
       <div style={styles.details}>
         <p style={styles.detailText}>
-          <strong>Subtotal:</strong> ${ amountDetails != undefined ? formatNumberWithSpaces(amountDetails.subtotal) : "Error al cargar el subtotal"}
+          <strong>Subtotal (desc. aplicado):</strong> ${ amountDetails != undefined ? formatNumberWithSpaces(amountDetails.subtotal) : "Error al cargar el subtotal"}
         </p>
         <p style={styles.detailText}>
           <strong>Impuesto:</strong> ${ amountDetails != undefined ? formatNumberWithSpaces(amountDetails.impuesto) : "Error al cargar el impuesto"}
