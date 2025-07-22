@@ -94,8 +94,25 @@ export const FloatingBoxStyled = styled.div`
   width: auto;
   height: auto;
 
-  @media (min-width: 640px) {
+  @media (min-width: 511px) {
     position: relative;
     top: 0;
   }
+`;
+
+export const ButtonContainerStyled = styled.div`
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+    overflow: hidden;
+
+    @media (min-width: 511px) {
+        justify-content: flex-end;
+        flex-direction: row;
+    }
 `;
